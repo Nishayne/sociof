@@ -1,0 +1,2 @@
+aws s3 sync . s3://dna-autodidact-production-bucket/repos/hu-sp-40cca44f5-technical-assignment-for-hu-spark-2521-java-HUSparkJava_Solved_1version132-1739538632928/master/ --delete --exclude ./venv/\* --exclude ./env/\*
+echo Success
