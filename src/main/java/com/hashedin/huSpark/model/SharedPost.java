@@ -1,0 +1,26 @@
+package com.hashedin.huSpark.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
+public class SharedPost {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable=false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name="original_post_id", nullable=false)
+    private Post originalPost;
+
+    private LocalDateTime sharedAt;
+}
