@@ -33,7 +33,7 @@ public class JwtTokenProvider {
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .claim("isAdmin", userPrincipal.isAdmin())
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512) // Updated method
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Updated method
                 .compact();
     }
 
