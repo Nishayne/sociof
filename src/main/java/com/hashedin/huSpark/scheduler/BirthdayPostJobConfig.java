@@ -6,10 +6,7 @@ import com.hashedin.huSpark.repository.PostRepository;
 import com.hashedin.huSpark.repository.UserRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -20,15 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Configuration for birthday post job
+ * Configuration for birthday post job.
  */
 @Configuration
 public class BirthdayPostJobConfig {
@@ -37,33 +32,37 @@ public class BirthdayPostJobConfig {
     private JobRepository jobRepository;
 
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     /**
-     * Job for creating birthday posts
+     * Job for creating birthday posts.
+     *
      * @return Job
      */
     @Bean
     public Job birthdayPostJob() {
-        return new JobBuilder("birthdayPostJob",jobRepository)
+        return new JobBuilder("birthdayPostJob", jobRepository)
                 .start(birthdayPostStep())
                 .build();
     }
 
     /**
-     * Step for creating birthday posts
+     * Step for creating birthday posts.
+     *
+     * Note: The transaction manager is now provided as part of the chunk() method.
+     *
      * @return Step
      */
     @Bean
     public Step birthdayPostStep() {
-        return new StepBuilder("birthdayPostStep",jobRepository)
-                .<User, Post>chunk(10)
+        return new StepBuilder("birthdayPostStep", jobRepository)
+                .<User, Post>chunk(10, transactionManager)
                 .reader(birthdayUserReader())
                 .processor(birthdayPostProcessor())
                 .writer(birthdayPostWriter())
@@ -71,7 +70,8 @@ public class BirthdayPostJobConfig {
     }
 
     /**
-     * Reader for users with birthdays today
+     * Reader for users with birthdays today.
+     *
      * @return ItemReader
      */
     @Bean
@@ -88,14 +88,15 @@ public class BirthdayPostJobConfig {
     }
 
     /**
-     * Processor to create birthday posts
+     * Processor to create birthday posts.
+     *
      * @return ItemProcessor
      */
     @Bean
     public ItemProcessor<User, Post> birthdayPostProcessor() {
         return user -> {
             Post post = Post.builder()
-                    .content("Happy Birthday " + user.getEmail() + "! 🎂🎉")
+                    .content("Happy Birthday " + user.getEmail() + "!")
                     .user(user)
                     .isShared(false)
                     .likes(0)
@@ -105,7 +106,8 @@ public class BirthdayPostJobConfig {
     }
 
     /**
-     * Writer to save birthday posts
+     * Writer to save birthday posts.
+     *
      * @return ItemWriter
      */
     @Bean

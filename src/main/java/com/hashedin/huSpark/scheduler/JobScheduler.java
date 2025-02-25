@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Scheduler for running jobs
+ * Scheduler for running jobs.
  */
 @Component
 public class JobScheduler {
@@ -21,7 +21,7 @@ public class JobScheduler {
     private Job birthdayPostJob;
 
     /**
-     * Run the birthday post job daily at midnight
+     * Run the birthday post job daily at midnight.
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleBirthdayPostJob() {

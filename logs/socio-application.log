@@ -1346,3 +1346,174 @@ Action:
 
 Consider defining a bean of type 'org.springframework.batch.core.configuration.annotation.JobBuilderFactory' in your configuration.
 
+2025-02-25 21:24:00 [main] INFO  c.h.huSpark.HuSparkApplication - Starting HuSparkApplication using Java 17.0.12 with PID 11576 (C:\Users\nemiliavaz\Downloads\hu-sp-40cca44f5-techn-40cca5173-nemiliavaz_deloitte-1740368742122\target\classes started by nemiliavaz in C:\Users\nemiliavaz\Downloads\hu-sp-40cca44f5-techn-40cca5173-nemiliavaz_deloitte-1740368742122)
+2025-02-25 21:24:00 [main] DEBUG c.h.huSpark.HuSparkApplication - Running with Spring Boot v3.4.2, Spring v6.2.2
+2025-02-25 21:24:00 [main] INFO  c.h.huSpark.HuSparkApplication - The following 1 profile is active: "local"
+2025-02-25 21:24:01 [main] INFO  o.s.b.c.c.annotation.BatchRegistrar - Finished Spring Batch infrastructure beans configuration in 6 ms.
+2025-02-25 21:24:01 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-25 21:24:02 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 100 ms. Found 7 JPA repository interfaces.
+2025-02-25 21:24:03 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-02-25 21:24:03 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-02-25 21:24:03 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-25 21:24:03 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-02-25 21:24:03 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2575 ms
+2025-02-25 21:24:04 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-25 21:24:04 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-02-25 21:24:05 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@62ab5e63
+2025-02-25 21:24:05 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-02-25 21:24:06 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-25 21:24:07 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-25 21:24:08 [main] DEBUG c.h.h.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-02-25 21:24:09 [main] INFO  o.s.b.c.r.s.JobRepositoryFactoryBean - No database type set, using meta data indicating: MYSQL
+2025-02-25 21:24:09 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'birthdayPostJobConfig': Unsatisfied dependency expressed through field 'stepBuilderFactory': No qualifying bean of type 'org.springframework.batch.core.configuration.annotation.StepBuilderFactory' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
+2025-02-25 21:24:09 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-25 21:24:09 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-02-25 21:24:09 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-02-25 21:24:09 [main] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-02-25 21:24:09 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-02-25 21:24:09 [main] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field stepBuilderFactory in com.hashedin.huSpark.scheduler.BirthdayPostJobConfig required a bean of type 'org.springframework.batch.core.configuration.annotation.StepBuilderFactory' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.batch.core.configuration.annotation.StepBuilderFactory' in your configuration.
+
+2025-02-25 21:27:21 [main] INFO  c.h.huSpark.HuSparkApplication - Starting HuSparkApplication using Java 17.0.12 with PID 3972 (C:\Users\nemiliavaz\Downloads\hu-sp-40cca44f5-techn-40cca5173-nemiliavaz_deloitte-1740368742122\target\classes started by nemiliavaz in C:\Users\nemiliavaz\Downloads\hu-sp-40cca44f5-techn-40cca5173-nemiliavaz_deloitte-1740368742122)
+2025-02-25 21:27:21 [main] DEBUG c.h.huSpark.HuSparkApplication - Running with Spring Boot v3.4.2, Spring v6.2.2
+2025-02-25 21:27:21 [main] INFO  c.h.huSpark.HuSparkApplication - The following 1 profile is active: "local"
+2025-02-25 21:27:22 [main] INFO  o.s.b.c.c.annotation.BatchRegistrar - Finished Spring Batch infrastructure beans configuration in 4 ms.
+2025-02-25 21:27:23 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-25 21:27:23 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 110 ms. Found 7 JPA repository interfaces.
+2025-02-25 21:27:24 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-02-25 21:27:24 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-02-25 21:27:24 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-25 21:27:24 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-02-25 21:27:24 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2640 ms
+2025-02-25 21:27:25 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-25 21:27:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-02-25 21:27:26 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@160c7c42
+2025-02-25 21:27:26 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-02-25 21:27:27 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-25 21:27:27 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-25 21:27:29 [main] DEBUG c.h.h.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-02-25 21:27:30 [main] INFO  o.s.b.c.r.s.JobRepositoryFactoryBean - No database type set, using meta data indicating: MYSQL
+2025-02-25 21:27:30 [main] INFO  o.s.b.c.l.support.SimpleJobLauncher - No TaskExecutor has been set, defaulting to synchronous executor.
+2025-02-25 21:27:30 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jobScheduler': Unsatisfied dependency expressed through field 'birthdayPostJob': Error creating bean with name 'birthdayPostJob' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Job]: Factory method 'birthdayPostJob' threw exception with message: Error creating bean with name 'birthdayPostStep' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+2025-02-25 21:27:30 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-25 21:27:30 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-02-25 21:27:30 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-02-25 21:27:30 [main] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-02-25 21:27:30 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-02-25 21:27:30 [main] ERROR o.s.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jobScheduler': Unsatisfied dependency expressed through field 'birthdayPostJob': Error creating bean with name 'birthdayPostJob' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Job]: Factory method 'birthdayPostJob' threw exception with message: Error creating bean with name 'birthdayPostStep' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:146)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1445)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:307)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1122)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1093)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1030)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at com.hashedin.huSpark.HuSparkApplication.main(HuSparkApplication.java:36)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'birthdayPostJob' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Job]: Factory method 'birthdayPostJob' threw exception with message: Error creating bean with name 'birthdayPostStep' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:489)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1361)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1191)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:563)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:307)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1573)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1519)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785)
+	... 22 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.batch.core.Job]: Factory method 'birthdayPostJob' threw exception with message: Error creating bean with name 'birthdayPostStep' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:199)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:88)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:168)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 34 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'birthdayPostStep' defined in class path resource [com/hashedin/huSpark/scheduler/BirthdayPostJobConfig.class]: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:489)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1361)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1191)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:563)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:307)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer$BeanMethodInterceptor.resolveBeanReference(ConfigurationClassEnhancer.java:380)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer$BeanMethodInterceptor.intercept(ConfigurationClassEnhancer.java:351)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$0.birthdayPostStep(<generated>)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig.birthdayPostJob(BirthdayPostJobConfig.java:50)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$0.CGLIB$birthdayPostJob$2(<generated>)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$FastClass$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invokeSuper(MethodProxy.java:258)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer$BeanMethodInterceptor.intercept(ConfigurationClassEnhancer.java:348)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$0.birthdayPostJob(<generated>)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:171)
+	... 37 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.batch.core.Step]: Factory method 'birthdayPostStep' threw exception with message: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:199)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:88)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:168)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 60 common frames omitted
+Caused by: org.springframework.batch.core.step.builder.StepBuilderException: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.batch.core.step.builder.AbstractTaskletStepBuilder.build(AbstractTaskletStepBuilder.java:126)
+	at org.springframework.batch.core.step.builder.SimpleStepBuilder.build(SimpleStepBuilder.java:134)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig.birthdayPostStep(BirthdayPostJobConfig.java:65)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$0.CGLIB$birthdayPostStep$1(<generated>)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$FastClass$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invokeSuper(MethodProxy.java:258)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer$BeanMethodInterceptor.intercept(ConfigurationClassEnhancer.java:348)
+	at com.hashedin.huSpark.scheduler.BirthdayPostJobConfig$$SpringCGLIB$$0.birthdayPostStep(<generated>)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:171)
+	... 63 common frames omitted
+Caused by: java.lang.IllegalStateException: A transaction manager must be provided
+	at org.springframework.util.Assert.state(Assert.java:79)
+	at org.springframework.batch.core.step.tasklet.TaskletStep.afterPropertiesSet(TaskletStep.java:126)
+	at org.springframework.batch.core.step.builder.AbstractTaskletStepBuilder.build(AbstractTaskletStepBuilder.java:123)
+	... 75 common frames omitted
