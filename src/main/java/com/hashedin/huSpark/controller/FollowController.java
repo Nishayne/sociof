@@ -1,39 +1,76 @@
 package com.hashedin.huSpark.controller;
 
+import com.hashedin.huSpark.security.CurrentUser;
+import com.hashedin.huSpark.security.UserPrincipal;
 import com.hashedin.huSpark.service.FollowService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Map;
 
+/**
+ * Controller for follow operations
+ */
 @RestController
-@RequestMapping("/follow")
+@RequestMapping("/api/follows")
+@Api(tags = "Follows")
 public class FollowController {
-    private final FollowService followService;
-    public FollowController(FollowService followService){
-        this.followService=followService;
+
+    @Autowired
+    private FollowService followService;
+
+    /**
+     * Follow a user
+     * @param userId User ID to follow
+     * @param currentUser Current authenticated user
+     * @return Success message
+     */
+    @PostMapping("/{userId}")
+    @ApiOperation("Follow a user")
+    public ResponseEntity<?> followUser(
+            @PathVariable Long userId,
+            @CurrentUser UserPrincipal currentUser) {
+        boolean followed = followService.followUser(currentUser.getId(), userId);
+        return ResponseEntity.ok(followed ? "User followed" : "User already followed");
     }
 
-    @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestBody Map<String,Long> request){
-        followService.followUser(request.get("followerId"),request.get("followingId"));
-        return ResponseEntity.ok("User followed successfully");
+    /**
+     * Unfollow a user
+     * @param userId User ID to unfollow
+     * @param currentUser Current authenticated user
+     * @return Success message
+     */
+    @DeleteMapping("/{userId}")
+    @ApiOperation("Unfollow a user")
+    public ResponseEntity<?> unfollowUser(
+            @PathVariable Long userId,
+            @CurrentUser UserPrincipal currentUser) {
+        boolean unfollowed = followService.unfollowUser(currentUser.getId(), userId);
+        return ResponseEntity.ok(unfollowed ? "User unfollowed" : "User was not followed");
     }
 
-    @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(@RequestBody Map<String,Long> request){
-        followService.unfollowUser(request.get("followerId"),request.get("followingId"));
-        return ResponseEntity.ok("User unfollowed successfully");
+    /**
+     * Get follower count for a user
+     * @param userId User ID
+     * @return Follower count
+     */
+    @GetMapping("/{userId}/followers/count")
+    @ApiOperation("Get follower count for a user")
+    public ResponseEntity<Long> getFollowerCount(@PathVariable Long userId) {
+        long count = followService.getFollowerCount(userId);
+        return ResponseEntity.ok(count);
     }
 
-    @PostMapping("/followers/{userId}")
-    public ResponseEntity<List<Long>>getFollowers(@PathVariable Long userId){
-        return ResponseEntity.ok(followService.getFollowers(userId));
+    /**
+     * Get following count for a user
+     * @param userId User ID
+     * @return Following count
+     */
+    @GetMapping("/{userId}/following/count")
+    @ApiOperation("Get following count for a user")
+    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
+        long count = followService.getFollowingCount(userId);
+        return ResponseEntity.ok(count);
     }
-
-    @PostMapping("/following/{userId}")
-    public ResponseEntity<List<Long>>getFollowing(@PathVariable Long userId){
-        return ResponseEntity.ok(followService.getFollowing(userId));
-    }
-
 }

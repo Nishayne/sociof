@@ -1,7 +1,9 @@
 package com.hashedin.huSpark.service;
 
-import com.hashedin.huSpark.model.Post;
-import com.hashedin.huSpark.model.User;
+import com.hashedin.huSpark.entity.Comment;
+import com.hashedin.huSpark.entity.Post;
+import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.repository.CommentRepository;
 import com.hashedin.huSpark.repository.PostRepository;
 import com.hashedin.huSpark.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class CommentService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        post.setComments(post.getComments() + 1);
+        post.getComments().add(comment);
         postRepository.save(post);
 
         return commentRepository.save(comment);

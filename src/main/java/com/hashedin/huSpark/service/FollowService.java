@@ -1,51 +1,91 @@
 package com.hashedin.huSpark.service;
 
-import com.hashedin.huSpark.model.Follow;
-import com.hashedin.huSpark.model.User;
+import com.hashedin.huSpark.entity.Follow;
+import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.exception.ResourceNotFoundException;
 import com.hashedin.huSpark.repository.FollowRepository;
-import com.hashedin.huSpark.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for follow-related operations
+ */
 @Service
 public class FollowService {
-    private final FollowRepository followRepository;
-    private final UserRepository userRepository;
-    public FollowService(FollowRepository followRepository, UserRepository userRepository){
-        this.followRepository=followRepository;
-        this.userRepository=userRepository;
-    }
-    public void followUser(Long followerId, Long followingId){
-        if(followRepository.existsByFollowerIdAndFollowingId(followerId,followingId)){
-            throw new RuntimeException("Already following user.");
+    @Autowired
+    private FollowRepository followRepository;
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * Follow a user
+     * @param followerId ID of follower
+     * @param followingId ID of user to follow
+     * @return True if follow was created, false if already following
+     */
+    @Transactional
+    @CacheEvict(value = {"users", "userStats"}, allEntries = true)
+    public boolean followUser(Long followerId, Long followingId) {
+        // Check if already following
+        if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
+            return false;
         }
-        User follower=userRepository.findById(followerId).orElseThrow(() -> new RuntimeException("Follower not found."));
-        User following=userRepository.findById(followingId).orElseThrow(() -> new RuntimeException("Following user not found."));
-        Follow follow=new Follow();
-        follow.setFollower(follower);
-        follow.setFollowing(following);
+
+        // Check if users exist
+        User follower = userService.findById(followerId);
+        User following = userService.findById(followingId);
+
+        // Create follow relationship
+        Follow follow = Follow.builder()
+                .follower(follower)
+                .following(following)
+                .build();
+
         followRepository.save(follow);
+        return true;
     }
 
-    public void unfollowUser(Long followerId,Long followingId){
-        if(!followRepository.existsByFollowerIdAndFollowingId(followerId,followingId)){
-            throw new RuntimeException("Not following user");
+    /**
+     * Unfollow a user
+     * @param followerId ID of follower
+     * @param followingId ID of user to unfollow
+     * @return True if unfollow was successful, false if not following
+     */
+    @Transactional
+    @CacheEvict(value = {"users", "userStats"}, allEntries = true)
+    public boolean unfollowUser(Long followerId, Long followingId) {
+        // Check if following
+        if (!followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
+            return false;
         }
-        followRepository.deleteByFollowerIdAndFollowingId(followerId,followingId);
+
+        // Delete follow relationship
+        followRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
+        return true;
     }
 
-    public List<Long> getFollowers(Long userId){
-        return followRepository.findByFollowingId(userId)
-                .stream()
-                .map(follow->follow.getFollower().getId())
-                .collect(Collectors.toList());
+    /**
+     * Get follower count for a user
+     * @param userId ID of user
+     * @return Number of followers
+     */
+    public long getFollowerCount(Long userId) {
+        // Check if user exists
+        userService.findById(userId);
+        return followRepository.countFollowersByUserId(userId);
     }
 
-    public List<Long> getFollowing(Long userId){
-        return followRepository.findByFollowerId(userId)
-                .stream()
-                .map(follow -> follow.getFollowing().getId())
-                .collect(Collectors.toList());
+    /**
+     * Get following count for a user
+     * @param userId ID of user
+     * @return Number of users being followed
+     */
+    public long getFollowingCount(Long userId) {
+        // Check if user exists
+        userService.findById(userId);
+        return followRepository.countFollowingByUserId(userId);
     }
 }

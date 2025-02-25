@@ -1,9 +1,11 @@
 package com.hashedin.huSpark.controller;
 
+import com.hashedin.huSpark.entity.Comment;
 import com.hashedin.huSpark.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
