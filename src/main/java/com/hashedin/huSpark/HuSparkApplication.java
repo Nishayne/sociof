@@ -100,7 +100,7 @@ public class HuSparkApplication {
 				"users",
 				"posts",
 				"reports",
-				"groups",
+				"groups_",
 				"userStats",
 				"postStats",
 				"reportStats",

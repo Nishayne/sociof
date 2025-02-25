@@ -36,7 +36,7 @@ public class GroupService {
      * @return Created group
      */
     @Transactional
-    @CacheEvict(value = {"groups", "groupStats"}, allEntries = true)
+    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public Group createGroup(GroupRequest groupRequest, Long creatorId) {
         User creator = userService.findById(creatorId);
 
@@ -71,7 +71,7 @@ public class GroupService {
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups", "groupStats"}, allEntries = true)
+    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public Group updateGroup(Long id, GroupRequest groupRequest, Long userId) {
         Group group = findById(id);
 
@@ -98,7 +98,7 @@ public class GroupService {
      * @param userId ID of user deleting the group
      */
     @Transactional
-    @CacheEvict(value = {"groups", "groupStats"}, allEntries = true)
+    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public void deleteGroup(Long id, Long userId) {
         Group group = findById(id);
 
@@ -119,7 +119,7 @@ public class GroupService {
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups", "groupStats"}, allEntries = true)
+    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public Group addUserToGroup(Long groupId, Long userId, Long currentUserId) {
         Group group = findById(groupId);
         User user = userService.findById(userId);
@@ -144,7 +144,7 @@ public class GroupService {
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups", "groupStats"}, allEntries = true)
+    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public Group removeUserFromGroup(Long groupId, Long userId, Long currentUserId) {
         Group group = findById(groupId);
         User user = userService.findById(userId);
@@ -167,7 +167,7 @@ public class GroupService {
      * @param pageable Pagination parameters
      * @return Page of groups
      */
-    @Cacheable(value = "groups", key = "'all_search_' + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    @Cacheable(value = "groups_", key = "'all_search_' + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<Group> getAllGroups(String searchTerm, Pageable pageable) {
         if (searchTerm != null && !searchTerm.isEmpty()) {
             return groupRepository.searchGroups(searchTerm, pageable);
@@ -190,7 +190,7 @@ public class GroupService {
      * @param userId ID of user
      * @return List of groups
      */
-    @Cacheable(value = "groups", key = "'member_' + #userId")
+    @Cacheable(value = "groups_", key = "'member_' + #userId")
     public List<Group> getGroupsByMemberId(Long userId) {
         return groupRepository.findGroupsByMemberId(userId);
     }
@@ -200,7 +200,7 @@ public class GroupService {
      * @param userId ID of user
      * @return List of groups
      */
-    @Cacheable(value = "groups", key = "'creator_' + #userId")
+    @Cacheable(value = "groups_", key = "'creator_' + #userId")
     public List<Group> getGroupsByCreatorId(Long userId) {
         return groupRepository.findByCreatorId(userId);
     }

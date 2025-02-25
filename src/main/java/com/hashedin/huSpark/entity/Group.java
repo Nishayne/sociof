@@ -17,7 +17,7 @@ import java.util.Set;
  * Entity representing a group in the SOCIO platform
  */
 @Entity
-@Table(name = "groups")
+@Table(name = "groups_")
 @Data
 @Builder
 @NoArgsConstructor

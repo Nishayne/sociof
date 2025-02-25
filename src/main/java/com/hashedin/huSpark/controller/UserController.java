@@ -6,9 +6,13 @@ import com.hashedin.huSpark.entity.User;
 import com.hashedin.huSpark.security.CurrentUser;
 import com.hashedin.huSpark.security.UserPrincipal;
 import com.hashedin.huSpark.service.UserService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +31,8 @@ import java.util.List;
 @Api(tags = "Users")
 public class UserController {
 
+    Logger log = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
 
@@ -38,6 +44,7 @@ public class UserController {
     @GetMapping("/me")
     @ApiOperation("Get current user")
     public ResponseEntity<User> getCurrentUser(@CurrentUser UserPrincipal currentUser) {
+        log.info("currentUser ID:"+currentUser.getId() + " - email:" + currentUser.getEmail());
         User user = userService.findById(currentUser.getId());
         return ResponseEntity.ok(user);
     }
