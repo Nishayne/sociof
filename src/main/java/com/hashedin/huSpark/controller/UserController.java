@@ -44,7 +44,7 @@ public class UserController {
     @GetMapping("/me")
     @ApiOperation("Get current user")
     public ResponseEntity<User> getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        log.info("currentUser ID:"+currentUser.getId() + " - email:" + currentUser.getEmail());
+        log.info("UserController: currentUser ID:"+currentUser.getId() + " - email:" + currentUser.getEmail());
         User user = userService.findById(currentUser.getId());
         return ResponseEntity.ok(user);
     }
@@ -57,6 +57,8 @@ public class UserController {
     @GetMapping("/{id}")
     @ApiOperation("Get a user by ID")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        log.info("UserController: userID: " + id);
+
         User user = userService.findById(id);
         return ResponseEntity.ok(user);
     }
@@ -74,6 +76,8 @@ public class UserController {
             @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest updateRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("UserController: updateUser: " + id);
+
         User updatedUser = userService.updateUser(id, updateRequest, currentUser.getId());
         return ResponseEntity.ok(updatedUser);
     }
@@ -89,6 +93,8 @@ public class UserController {
     public ResponseEntity<?> deleteUser(
             @PathVariable Long id,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("UserController: deleteUser: " + id);
+
         userService.deleteUser(id, currentUser.getId());
         return ResponseEntity.ok().build();
     }
@@ -104,6 +110,8 @@ public class UserController {
     public ResponseEntity<Page<User>> getAllUsers(
             @RequestParam(required = false) String searchTerm,
             Pageable pageable) {
+        log.info("UserController: searchTerm: " + searchTerm);
+
         Page<User> users = userService.getAllUsers(searchTerm, pageable);
         return ResponseEntity.ok(users);
     }
@@ -120,6 +128,9 @@ public class UserController {
     public ResponseEntity<List<User>> bulkImportUsers(
             @RequestParam("file") MultipartFile file,
             @CurrentUser UserPrincipal currentUser) {
+        
+        log.info("UserController: bulkImportUsers: fileSize: " + file.getSize());
+
         List<User> importedUsers = userService.bulkImportUsers(file, currentUser.getId());
         return ResponseEntity.ok(importedUsers);
     }
@@ -133,6 +144,9 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation("Get users ordered by follower count (Admin only)")
     public ResponseEntity<Page<Object[]>> getUsersOrderedByFollowerCount(Pageable pageable) {
+
+        log.info("UserController: getUsersOrderedByFollowerCount: pageSize: " + pageable.getPageSize());
+
         Page<Object[]> users = userService.getUsersOrderedByFollowerCount(pageable);
         return ResponseEntity.ok(users);
     }

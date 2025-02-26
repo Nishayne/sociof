@@ -9,6 +9,9 @@ import com.hashedin.huSpark.service.GroupService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,8 @@ import java.util.List;
 @Api(tags = "Groups")
 public class GroupController {
 
+    Logger log = LoggerFactory.getLogger(GroupController.class);
+
     @Autowired
     private GroupService groupService;
 
@@ -40,6 +45,8 @@ public class GroupController {
     public ResponseEntity<Group> createGroup(
             @Valid @RequestBody GroupRequest groupRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: createGroup : UserID: " + currentUser.getId());
+
         Group group = groupService.createGroup(groupRequest, currentUser.getId());
         return ResponseEntity.ok(group);
     }
@@ -52,6 +59,8 @@ public class GroupController {
     @GetMapping("/{id}")
     @ApiOperation("Get a group by ID")
     public ResponseEntity<Group> getGroupById(@PathVariable Long id) {
+        log.info("GroupController: getGroupId: " + id);
+
         Group group = groupService.findById(id);
         return ResponseEntity.ok(group);
     }
@@ -69,6 +78,8 @@ public class GroupController {
             @PathVariable Long id,
             @Valid @RequestBody GroupRequest groupRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: Update groupId: " + id);
+
         Group updatedGroup = groupService.updateGroup(id, groupRequest, currentUser.getId());
         return ResponseEntity.ok(updatedGroup);
     }
@@ -84,6 +95,8 @@ public class GroupController {
     public ResponseEntity<?> deleteGroup(
             @PathVariable Long id,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: Delete groupId: " + id);
+
         groupService.deleteGroup(id, currentUser.getId());
         return ResponseEntity.ok().build();
     }
@@ -101,6 +114,8 @@ public class GroupController {
             @PathVariable Long groupId,
             @PathVariable Long userId,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: addUser groupId: " + groupId);
+
         Group group = groupService.addUserToGroup(groupId, userId, currentUser.getId());
         return ResponseEntity.ok(group);
     }
@@ -118,6 +133,8 @@ public class GroupController {
             @PathVariable Long groupId,
             @PathVariable Long userId,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: removeUser groupId: " + groupId);
+
         Group group = groupService.removeUserFromGroup(groupId, userId, currentUser.getId());
         return ResponseEntity.ok(group);
     }
@@ -133,6 +150,8 @@ public class GroupController {
     public ResponseEntity<Page<Group>> getAllGroups(
             @RequestParam(required = false) String searchTerm,
             Pageable pageable) {
+        log.info("GroupController: getAllGroups searchTerm: " + searchTerm);
+
         Page<Group> groups = groupService.getAllGroups(searchTerm, pageable);
         return ResponseEntity.ok(groups);
     }
@@ -148,6 +167,8 @@ public class GroupController {
     public ResponseEntity<Page<Group>> getVisibleGroups(
             @CurrentUser UserPrincipal currentUser,
             Pageable pageable) {
+        log.info("GroupController: getAllGroupsVisible: UserId: " + currentUser.getId());
+
         Page<Group> groups = groupService.getVisibleGroups(currentUser.getId(), pageable);
         return ResponseEntity.ok(groups);
     }
@@ -160,6 +181,8 @@ public class GroupController {
     @GetMapping("/my-groups")
     @ApiOperation("Get groups where user is a member")
     public ResponseEntity<List<Group>> getMyGroups(@CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: getMyGroups: UserId: " + currentUser.getId());
+
         List<Group> groups = groupService.getGroupsByMemberId(currentUser.getId());
         return ResponseEntity.ok(groups);
     }
@@ -172,6 +195,8 @@ public class GroupController {
     @GetMapping("/created")
     @ApiOperation("Get groups created by current user")
     public ResponseEntity<List<Group>> getCreatedGroups(@CurrentUser UserPrincipal currentUser) {
+        log.info("GroupController: getGroupsCreated: UserId: " + currentUser.getId());
+
         List<Group> groups = groupService.getGroupsByCreatorId(currentUser.getId());
         return ResponseEntity.ok(groups);
     }
@@ -185,6 +210,8 @@ public class GroupController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation("Get groups ordered by member count (Admin only)")
     public ResponseEntity<Page<Object[]>> getGroupsOrderedByMemberCount(Pageable pageable) {
+        log.info("GroupController: getGroupsOrderedByMemberCount");
+
         Page<Object[]> groups = groupService.getGroupsOrderedByMemberCount(pageable);
         return ResponseEntity.ok(groups);
     }
@@ -198,6 +225,8 @@ public class GroupController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation("Get groups ordered by post count (Admin only)")
     public ResponseEntity<Page<Object[]>> getGroupsOrderedByPostCount(Pageable pageable) {
+        log.info("GroupController: getGroupsOrderedByPostCount");
+
         Page<Object[]> groups = groupService.getGroupsOrderedByPostCount(pageable);
         return ResponseEntity.ok(groups);
     }

@@ -11,6 +11,9 @@ import com.hashedin.huSpark.service.ShareService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +30,9 @@ import java.util.List;
 @RequestMapping("/api/posts")
 @Api(tags = "Posts")
 public class PostController {
+
+    Logger log = LoggerFactory.getLogger(PostController.class);
+
 
     @Autowired
     private PostService postService;
@@ -45,6 +51,8 @@ public class PostController {
     public ResponseEntity<Post> createPost(
             @Valid @RequestBody PostRequest postRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("PostController: createPost: UserId: " + currentUser.getId());
+
         Post post = postService.createPost(postRequest, currentUser.getId());
         return ResponseEntity.ok(post);
     }
@@ -60,6 +68,8 @@ public class PostController {
     public ResponseEntity<Post> sharePost(
             @PathVariable Long postId,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("PostController: createPost: UserId: " + currentUser.getId());
+
         Post post = shareService.sharePost(postId, currentUser.getId());
         return ResponseEntity.ok(post);
     }
@@ -78,6 +88,8 @@ public class PostController {
             @PathVariable Long postId,
             @RequestBody ShareRequest shareRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("PostController: sharePostAdvanced: UserId: " + currentUser.getId());
+
         Post sharedPost = shareService.sharePost(postId, currentUser.getId(), shareRequest);
         return ResponseEntity.ok(sharedPost);
     }
@@ -90,6 +102,8 @@ public class PostController {
     @GetMapping("/{id}")
     @ApiOperation("Get a post by ID")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+        log.info("PostController: getPost: postID: " + id);
+
         Post post = postService.findById(id);
         return ResponseEntity.ok(post);
     }
@@ -107,6 +121,9 @@ public class PostController {
             @PathVariable Long id,
             @Valid @RequestBody PostRequest postRequest,
             @CurrentUser UserPrincipal currentUser) {
+
+        log.info("PostController: UpdatePost: UserId: " + currentUser.getId());
+
         Post updatedPost = postService.updatePost(id, postRequest, currentUser.getId());
         return ResponseEntity.ok(updatedPost);
     }

@@ -10,6 +10,9 @@ import com.hashedin.huSpark.service.ReportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,8 @@ import java.util.List;
 @RequestMapping("/api/reports")
 @Api(tags = "Reports")
 public class ReportController {
+
+    Logger log = LoggerFactory.getLogger(ReportController.class);
 
     @Autowired
     private ReportService reportService;

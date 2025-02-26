@@ -7,6 +7,9 @@ import com.hashedin.huSpark.security.UserPrincipal;
 import com.hashedin.huSpark.service.ShareService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/shares")
 @Api(tags = "Post Sharing")
 public class ShareController {
+
+    Logger log = LoggerFactory.getLogger(ShareController.class);
 
     @Autowired
     private ShareService shareService;
