@@ -1,12 +1,7 @@
 package com.hashedin.huSpark.service;
 
-import com.hashedin.huSpark.dto.GroupDto;
-import com.hashedin.huSpark.dto.GroupRequest;
-import com.hashedin.huSpark.entity.Group;
-import com.hashedin.huSpark.entity.User;
-import com.hashedin.huSpark.exception.ResourceNotFoundException;
-import com.hashedin.huSpark.exception.UnauthorizedException;
-import com.hashedin.huSpark.repository.GroupRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,8 +10,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
+import com.hashedin.huSpark.dto.GroupRequest;
+import com.hashedin.huSpark.entity.Group;
+import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.exception.ResourceNotFoundException;
+import com.hashedin.huSpark.exception.UnauthorizedException;
+import com.hashedin.huSpark.repository.GroupRepository;
 
 /**
  * Service for group-related operations
@@ -45,11 +44,19 @@ public class GroupService {
                 .isPrivate(groupRequest.getIsPrivate())
                 .creator(creator)
                 .build();
-
-        // Add creator as a member
-        group.getMembers().add(creator);
-
-        return groupRepository.save(group);
+        Group retVal = null;
+        try {
+            // Add creator as a member
+            //Hibernate.initialize(group.getMembers()); // Explicitly initialize, prevent concurrency problems
+            group.getMembers().add(creator);
+            retVal = groupRepository.save(group);
+            return retVal;
+        }
+        catch(Exception e)
+        {
+            System.err.println("createGroup exception  " + e.toString());
+        }
+        return retVal;
     }
 
     /**

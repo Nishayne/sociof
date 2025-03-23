@@ -1,6 +1,15 @@
 package com.hashedin.huSpark.service;
 
-import com.hashedin.huSpark.dto.PostDto;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.hashedin.huSpark.dto.PostRequest;
 import com.hashedin.huSpark.entity.Group;
 import com.hashedin.huSpark.entity.Post;
@@ -11,16 +20,6 @@ import com.hashedin.huSpark.repository.CommentRepository;
 import com.hashedin.huSpark.repository.GroupRepository;
 import com.hashedin.huSpark.repository.LikeRepository;
 import com.hashedin.huSpark.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Service for post-related operations
@@ -166,6 +165,19 @@ public class PostService {
         postRepository.delete(post);
     }
 
+     /**
+     * Admin Delete a post
+     * @param id ID of post to delete
+     * @param userId ID of user deleting the post
+     */
+    @Transactional
+    @CacheEvict(value = {"posts", "postStats"}, allEntries = true)
+    public void deletePost(Long id) {
+        Post post = findById(id);
+
+        postRepository.delete(post);
+    }
+
     /**
      * Get posts by user
      * @param userId ID of user to get posts for
@@ -203,7 +215,18 @@ public class PostService {
      * @return Page of posts visible to current user
      */
     public Page<Post> getFeed(Long userId, Pageable pageable) {
-        return postRepository.findVisiblePosts(userId, pageable);
+        return postRepository.findVisiblePosts(userId, pageable); 
+    }
+
+    /**
+     * Admin only: Get feed for all users
+     * @param pageable Pagination parameters
+     * @return Page of posts visible to current user
+     * findAll is not for user, since user visible Posts are always specific to current user, 
+     * hence for Users use findVisiblePosts instead of findAll
+     */
+    public Page<Post> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable); 
     }
 
     /**

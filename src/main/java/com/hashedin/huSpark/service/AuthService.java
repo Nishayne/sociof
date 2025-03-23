@@ -9,6 +9,9 @@ import com.hashedin.huSpark.exception.ResourceNotFoundException;
 import com.hashedin.huSpark.exception.UserAlreadyExistsException;
 import com.hashedin.huSpark.repository.UserRepository;
 import com.hashedin.huSpark.security.JwtTokenProvider;
+
+import ch.qos.logback.classic.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,8 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service for authentication-related operations
@@ -39,10 +46,12 @@ public class AuthService {
 
     /**
      * Register a new user
+     * 
      * @param signUpRequest SignUpRequest
      * @return User
      */
     public User registerUser(SignUpRequest signUpRequest) {
+
         // Check if the user already exists
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new UserAlreadyExistsException("Email is already taken");
@@ -61,18 +70,26 @@ public class AuthService {
                 .passwordUpdatedAt(new Date())
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        Optional<User> newUser = userRepository.findByEmail(signUpRequest.getEmail());
+
+        User created = newUser.orElseThrow(() -> new InternalError(" - Failed to create User with email: " + signUpRequest.getEmail()));
+
+        return created;
     }
 
     /**
      * Login a user
+     * 
      * @param loginRequest LoginRequest
      * @return AuthResponse
      */
     public AuthResponse loginUser(LoginRequest loginRequest) {
         // Find user first to check if password is expired
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + loginRequest.getEmail()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("User not found with email: " + loginRequest.getEmail()));
 
         // Check if password is expired (older than 30 days)
         if (user.getPasswordUpdatedAt() != null) {
@@ -89,9 +106,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -103,6 +118,7 @@ public class AuthService {
 
     /**
      * Reset user password
+     * 
      * @param request PasswordResetRequest
      * @return User
      */

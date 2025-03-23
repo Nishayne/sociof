@@ -32,7 +32,8 @@ public class JobScheduler {
 
             jobLauncher.run(birthdayPostJob, params);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("scheduleBirthdayPostJob exception " + e.toString());
+            //e.printStackTrace();
         }
     }
 }

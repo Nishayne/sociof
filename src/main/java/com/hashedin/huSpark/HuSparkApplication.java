@@ -1,12 +1,20 @@
 package com.hashedin.huSpark;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import io.github.cdimascio.dotenv.Dotenv;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -16,12 +24,6 @@ import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Main application class for SOCIO social network
@@ -33,6 +35,7 @@ import java.util.List;
 @EnableBatchProcessing
 public class HuSparkApplication {
 	public static void main(String[] args) {
+		Dotenv dotenv = Dotenv.configure().load(); // Load the .env file.
 		SpringApplication.run(HuSparkApplication.class, args);
 	}
 

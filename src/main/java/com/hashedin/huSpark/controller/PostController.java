@@ -1,16 +1,6 @@
 package com.hashedin.huSpark.controller;
 
-import com.hashedin.huSpark.dto.PostDto;
-import com.hashedin.huSpark.dto.PostRequest;
-import com.hashedin.huSpark.dto.ShareRequest;
-import com.hashedin.huSpark.entity.Post;
-import com.hashedin.huSpark.security.CurrentUser;
-import com.hashedin.huSpark.security.UserPrincipal;
-import com.hashedin.huSpark.service.PostService;
-import com.hashedin.huSpark.service.ShareService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import jakarta.validation.Valid;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +9,27 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.hashedin.huSpark.dto.PostRequest;
+import com.hashedin.huSpark.dto.ShareRequest;
+import com.hashedin.huSpark.entity.Post;
+import com.hashedin.huSpark.security.CurrentUser;
+import com.hashedin.huSpark.security.UserPrincipal;
+import com.hashedin.huSpark.service.PostService;
+import com.hashedin.huSpark.service.ShareService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import jakarta.validation.Valid;
 
 /**
  * Controller for post operations
@@ -129,6 +137,20 @@ public class PostController {
     }
 
     /**
+     * Admin: Delete a post
+     * @param id Post ID
+     * @return Deleted post
+     */
+    @DeleteMapping("/{id}/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation("Delete a post")
+    public ResponseEntity<?> deletePost(
+            @PathVariable Long id) {
+        postService.deletePost(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * Delete a post
      * @param id Post ID
      * @param currentUser Current authenticated user
@@ -189,6 +211,20 @@ public class PostController {
             @CurrentUser UserPrincipal currentUser,
             Pageable pageable) {
         Page<Post> posts = postService.getFeed(currentUser.getId(), pageable);
+        return ResponseEntity.ok(posts);
+    }
+
+     /**
+     * Admin: Get All Posts 
+     * @param pageable Pagination parameters
+     * @return Page of posts
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation("Get All Posts")
+    public ResponseEntity<Page<Post>> getAllPosts(
+            Pageable pageable) {
+        Page<Post> posts = postService.getAllPosts(pageable);
         return ResponseEntity.ok(posts);
     }
 
