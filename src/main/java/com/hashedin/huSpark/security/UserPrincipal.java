@@ -1,14 +1,18 @@
 package com.hashedin.huSpark.security;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hashedin.huSpark.entity.User;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hashedin.huSpark.entity.User;
 
 /**
  * Custom UserDetails implementation for Spring Security
@@ -22,10 +26,14 @@ public class UserPrincipal implements UserDetails {
 
     private boolean isAdmin;
 
-    private Collection<? extends GrantedAuthority> authorities;
+    // private Collection<? extends GrantedAuthority> authorities;
+    private List<GrantedAuthority> authorities; // Change to List<GrantedAuthority>
+
+
+    private static final Logger log = LoggerFactory.getLogger(UserPrincipal.class);
 
     public UserPrincipal(Long id, String email, String password, boolean isAdmin,
-                         Collection<? extends GrantedAuthority> authorities) {
+                         List<GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -39,13 +47,17 @@ public class UserPrincipal implements UserDetails {
      * @return UserPrincipal
      */
     public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        List<GrantedAuthority> authorities = new  CopyOnWriteArrayList<>(); // Use CopyOnWriteArrayList to prevent ConcurrentModificationException
 
         if (user.getIsAdmin()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+        log.info("UserPrincipal created for user: {}", user.getEmail());
+        log.info("Authorities: {}", authorities);
 
         return new UserPrincipal(
                 user.getId(),

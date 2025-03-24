@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Exception for resource not found errors
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
+@ResponseStatus(HttpStatus.CONFLICT)
+public class ResourceAlreadyExistsException extends RuntimeException {
 
-    private static final long serialVersionUID = 10000003L;
+    private static final long serialVersionUID = 10000004L;
 
-    public ResourceNotFoundException(String message) {
+    public ResourceAlreadyExistsException(String message) {
         super(message);
     }
 }

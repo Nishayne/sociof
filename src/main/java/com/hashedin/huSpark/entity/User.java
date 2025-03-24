@@ -3,8 +3,8 @@ package com.hashedin.huSpark.entity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,6 +16,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -96,25 +97,25 @@ public class User  implements UserDetails{
 
     private Date passwordUpdatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Post> posts = new HashSet<>();
+    private Set<Post> posts = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "follower")
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Follow> following = new HashSet<>();
+    private Set<Follow> following = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "following")
+    @OneToMany(mappedBy = "following", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Follow> followers = new HashSet<>();
+    private Set<Follow> followers = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Group> createdGroups = new HashSet<>();
+    private Set<Group> createdGroups = new CopyOnWriteArraySet<>();
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Group> memberGroups = new HashSet<>();
+    private Set<Group> memberGroups = new CopyOnWriteArraySet<>();
 
     @Override
     public String getUsername() {

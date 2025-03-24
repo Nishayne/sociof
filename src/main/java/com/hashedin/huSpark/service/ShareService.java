@@ -1,17 +1,22 @@
 package com.hashedin.huSpark.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.hashedin.huSpark.dto.ShareRequest;
 import com.hashedin.huSpark.entity.Post;
 import com.hashedin.huSpark.entity.User;
 import com.hashedin.huSpark.exception.ResourceNotFoundException;
 import com.hashedin.huSpark.repository.PostRepository;
 import com.hashedin.huSpark.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ShareService {
+
+    private final Logger log = LoggerFactory.getLogger(ShareService.class);
 
     @Autowired
     private PostRepository postRepository;
@@ -21,17 +26,25 @@ public class ShareService {
 
     @Transactional
     public Post sharePost(Long postId, Long userId) {
+        log.info("ShareService: sharePost: PostId: {}, UserId: {}", postId, userId);
         return sharePost(postId, userId, new ShareRequest());
     }
 
     @Transactional
     public Post sharePost(Long postId, Long userId, ShareRequest shareRequest) {
+        log.info("ShareService: sharePost: PostId: {}, UserId: {}, ShareRequest: {}", postId, userId, shareRequest);
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("User not found with id: {}", userId);
+                    return new ResourceNotFoundException("User not found with id: " + userId);
+                });
 
         Post originalPost = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
-
+                .orElseThrow(() -> {
+                    log.warn("Post not found with id: {}", postId);
+                    return new ResourceNotFoundException("Post not found with id: " + postId);
+                });
 
         // Create a new post for the shared content
         Post sharedPost = Post.builder()
@@ -47,6 +60,8 @@ public class ShareService {
                 .user(user) // Owner of new shared post
                 .build();
 
-        return postRepository.save(sharedPost);
+        Post savedSharedPost = postRepository.saveAndFlush(sharedPost); // Changed from save to saveAndFlush
+        log.info("Post shared successfully: SharedPostId: {}", savedSharedPost.getId());
+        return savedSharedPost;
     }
 }

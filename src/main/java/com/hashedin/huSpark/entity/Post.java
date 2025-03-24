@@ -1,8 +1,8 @@
 package com.hashedin.huSpark.entity;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -60,17 +61,17 @@ public class Post {
     @JoinColumn(name = "group_id")
     private Group group;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Comment> comments = new HashSet<>();
+    private Set<Comment> comments = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Like> postLikes = new HashSet<>();
+    private Set<Like> postLikes = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Report> reports = new HashSet<>();
+    private Set<Report> reports = new CopyOnWriteArraySet<>();
 
     @CreationTimestamp
     private Date createdAt;

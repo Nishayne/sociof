@@ -1,18 +1,18 @@
 package com.hashedin.huSpark.entity;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +37,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Group {
+
+    private static final Logger log = LoggerFactory.getLogger(Group.class);
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,7 +54,7 @@ public class Group {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @JoinTable(
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
@@ -60,9 +63,19 @@ public class Group {
     @Builder.Default
     private Set<User> members = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for posts,  Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
     private Set<Post> posts = new CopyOnWriteArraySet<>();
+
+    public Set<User> getMembers() {
+        log.info("Accessing members for group: {}", this.id);
+        return members;
+    }
+
+    public Set<Post> getPosts() {
+        log.info("Accessing posts for group: {}", this.id);
+        return posts;
+    }
 
     @CreationTimestamp
     private Date createdAt;

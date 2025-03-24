@@ -1,10 +1,11 @@
 package com.hashedin.huSpark.dto;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
-import java.util.Date;
 
 /**
  * DTO for post representation
@@ -23,10 +24,6 @@ public class PostDto {
     private boolean isShared;
     private Long originalPostId;
     private Long originalUserId;
-    private Long userId;
-    private String userEmail;
-    private Long groupId;
-    private String groupName;
     private Date createdAt;
 }
 

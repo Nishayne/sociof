@@ -1,6 +1,8 @@
 package com.hashedin.huSpark.repository;
 
-import com.hashedin.huSpark.entity.*;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,9 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import com.hashedin.huSpark.dto.UserCreationDateDTO;
+import com.hashedin.huSpark.entity.User;
 
 /**
  * Repository for User entity
@@ -27,6 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<User> searchUsers(@Param("searchTerm") String searchTerm, Pageable pageable);
 
-    @Query("SELECT DATE(u.createdAt) as date, COUNT(u) as count FROM User u GROUP BY DATE(u.createdAt) ORDER BY date")
-    List<Object[]> countUsersByCreationDate();
+    @Query("SELECT new com.hashedin.huSpark.dto.UserCreationDateDTO(DATE(u.createdAt), COUNT(u)) FROM User u GROUP BY DATE(u.createdAt) ORDER BY DATE(u.createdAt)")
+    List<UserCreationDateDTO> countUsersByCreationDate();
 }
