@@ -47,7 +47,7 @@ public class SecurityConfig {
     /**
      * Define authentication provider
      */
-    //@Bean
+    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
