@@ -1,6 +1,6 @@
 # HuSparkMasterAssigment
 
-# Imp: on linux prefix docker with sudo since docker needs a special ac to run so instead sudo is better
+### Imp: on linux prefix docker with sudo since docker needs a special ac to run so instead sudo is better
 
 ```bash
 docker ps  # Check running containers
