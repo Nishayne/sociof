@@ -10,7 +10,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -35,8 +37,16 @@ import springfox.documentation.spring.web.plugins.Docket;
 @EnableBatchProcessing
 public class HuSparkApplication {
 	public static void main(String[] args) {
-		Dotenv dotenv = Dotenv.configure().load(); // Load the .env file.
-		SpringApplication.run(HuSparkApplication.class, args);
+		ConfigurableApplicationContext context  = SpringApplication.run(HuSparkApplication.class,args);
+        ConfigurableEnvironment environment = context.getEnvironment();
+
+        System.out.println("Active profiles: " + java.util.Arrays.toString(environment.getActiveProfiles()));
+        System.out.println("Property spring.datasource.url: " + environment.getProperty("spring.datasource.url"));
+    
+        if (environment.getActiveProfiles()[0] == "local")
+		{
+			Dotenv dotenv = Dotenv.configure().load(); //for local Load the .env file.
+		}
 	}
 
 	/**
