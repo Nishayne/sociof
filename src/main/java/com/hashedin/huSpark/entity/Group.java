@@ -1,6 +1,7 @@
 package com.hashedin.huSpark.entity;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -61,11 +62,11 @@ public class Group {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @Builder.Default
-    private Set<User> members = new CopyOnWriteArraySet<>();
+    private Set<User> members = new /*CopyOnWriteArraySet*/HashSet<>();
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for posts,  Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
-    private Set<Post> posts = new CopyOnWriteArraySet<>();
+    private Set<Post> posts = new /*CopyOnWriteArraySet*/HashSet<>();
 
     public Set<User> getMembers() {
         log.info("Accessing members for group: {}", this.id);

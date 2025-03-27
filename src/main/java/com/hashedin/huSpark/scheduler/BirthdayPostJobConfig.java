@@ -1,9 +1,8 @@
 package com.hashedin.huSpark.scheduler;
 
-import com.hashedin.huSpark.entity.Post;
-import com.hashedin.huSpark.entity.User;
-import com.hashedin.huSpark.repository.PostRepository;
-import com.hashedin.huSpark.repository.UserRepository;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -19,8 +18,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.hashedin.huSpark.entity.Post;
+import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.repository.PostRepository;
+import com.hashedin.huSpark.repository.UserRepository;
 
 /**
  * Configuration for birthday post job.
@@ -112,6 +113,12 @@ public class BirthdayPostJobConfig {
      */
     @Bean
     public ItemWriter<Post> birthdayPostWriter() {
-        return posts -> postRepository.saveAll(posts);
+        return posts -> {
+            if (posts == null || posts.isEmpty()) {
+                System.out.println("No posts to save.");
+                return;
+            }
+            postRepository.saveAllAndFlush(posts);
+        };
     }
 }

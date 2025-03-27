@@ -36,10 +36,30 @@ sudo docker run --name socio --network my-network -e DB_HOST=mysql_container -p 
 # 
 # Database connection properties
 # if using application-local.properties, ensure DB_HOST=mysql_container 
-# DB_HOST=localhost for local testing, for docker use DB_HOST=mysql_container, provided both containers on same host network
+# DB_HOST=localhost for local testing, 
+# for docker use docker run parameters -e DB_HOST=mysql_container, provided both containers on same host network
+
+# automatic end to end test script run 
+sh testing_auto_validate.sh
 
 ```
+
 # SOCIO - Social Network Project
+
+## Key files
+- .env – Environment variables
+
+- .gitignore – Git ignore rules
+
+- Dockerfile – Docker containerization
+
+- pom.xml – Maven build configuration
+
+- src/main/java/com/hashedin/huSpark/ – Main Java source code
+
+- SwaggerConfig.java – Swagger API configuration
+
+- testing_auto_validate.sh – Shell script for testing
 
 ## Project Overview
 **SOCIO** is a Java-based social networking application with a MySQL backend, featuring a robust authentication system, user profiles, posts, comments, likes, friend requests, and real-time messaging. The system will include a RESTful API with Spring Boot and integrate Spring Security for authentication.
@@ -139,3 +159,35 @@ sudo docker run --name socio --network my-network -e DB_HOST=mysql_container -p 
 
 This document serves as a blueprint for the SOCIO project, ensuring smooth development and integration at each milestone.
 
+This is a detailed project with multiple milestones. Here's how we can proceed step by step:
+
+## **Step 1: Project Setup (Milestone 1)**
+
+1. **Create a Spring Boot Project**
+   - Use Spring Initializr (`https://start.spring.io/`) with dependencies:
+     - Spring Web
+     - Spring Security
+     - Spring Boot Starter Data JDBC
+     - MySQL Driver
+     - Spring Boot Starter Validation
+     - Swagger (Springdoc OpenAPI)
+     - Lombok (for reducing boilerplate code)
+
+2. **Database Setup & ER Diagram**
+   - Define an **ER Diagram** for users, posts, groups, interactions, and admin functionalities.
+   - Create a MySQL schema.
+
+3. **Basic CRUD Operations using JDBC**
+   - Implement `UserController`, `PostController`, `GroupController`
+   - Define `UserService`, `PostService`, `GroupService`
+   - Create repository classes for direct JDBC operations.
+
+4. **Spring Security Integration**
+   - Add basic authentication (username-password)
+   - Secure all endpoints so only authenticated users can access APIs.
+
+5. **Swagger Documentation**
+   - Integrate Springdoc OpenAPI (`springdoc-openapi-starter-webmvc-ui`).
+   - Ensure all APIs are documented.
+
+---

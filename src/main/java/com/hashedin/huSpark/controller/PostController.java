@@ -33,7 +33,7 @@ import com.hashedin.huSpark.security.UserPrincipal;
 import com.hashedin.huSpark.service.PostService;
 import com.hashedin.huSpark.service.ShareService;
 
-import io.swagger.annotations.Api; // Import PostDto
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 
@@ -49,17 +49,21 @@ public class PostController {
     private final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
     private final ShareService shareService;
-    private final ModelMapper modelMapper = new ModelMapper();
+
+    // Inject ModelMapper (Uses the Bean from ModelMapperConfig)
+    private final ModelMapper modelMapper;
 
     /**
      * Constructor for PostController.
      * @param postService Service for post operations.
      * @param shareService Service for sharing posts.
+     * @param modelMapper Injected ModelMapper bean.
      */
     @Autowired
-    public PostController(PostService postService, ShareService shareService) {
+    public PostController(PostService postService, ShareService shareService, ModelMapper modelMapper) {
         this.postService = postService;
         this.shareService = shareService;
+        this.modelMapper = modelMapper;
     }
 
     /**
@@ -77,7 +81,11 @@ public class PostController {
 
         try {
             Post post = postService.createPost(postRequest, currentUser.getId());
-            return ResponseEntity.ok(modelMapper.map(post, PostDto.class));
+
+            // Use pre-configured modelMapper bean
+            PostDto postDto = modelMapper.map(post, PostDto.class);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(postDto); // Return PostDto
         } catch (IllegalArgumentException e) {
             log.warn("Failed to create post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

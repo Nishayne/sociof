@@ -9,9 +9,11 @@ API_URL="http://localhost:8080/api"
 
 # Login and get the token
 echo "--- Executing Signup Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
+signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "test1@test.com", "password": "pass1", "dateOfBirth": "2023-04-22T15:00:00Z"}')
+
 signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "test2@test.com", "password": "pass1", "dateOfBirth": "2023-04-22T15:00:00Z"}')
 
-login_response=$(curl -k "$API_URL/auth/login" -X POST -H "Content-Type: application/json" -d '{"email": "test2@test.com", "password": "pass1"}')
+login_response=$(curl -k "$API_URL/auth/login" -X POST -H "Content-Type: application/json" -d '{"email": "test1@test.com", "password": "pass1"}')
 
 # Extract token
 TOKEN=$(echo "$login_response" | sed 's/{.*\"accessToken\":\"\([^\"]*\).*}/\1/g') # Extract token from previous response
@@ -98,7 +100,7 @@ execute_curl "Share Post Advanced" "curl -X POST '$API_URL/posts/$POST_ID/share/
 
 # Update Post
 echo "--- Executing Update Post Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-UPDATE_POST_JSON='{"content": "Updated Post Content", "fileUrl": "http://example.com/updated.jpg", "fileType": "image/png", "groupId":' + $GROUP_ID + '}'
+UPDATE_POST_JSON='{"content": "Updated Post Content", "fileUrl": "http://example.com/updated.jpg", "fileType": "image/png", "groupId":'"$GROUP_ID"' }'
 execute_curl "Update Post" "curl -X PUT '$API_URL/posts/$POST_ID' -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '$UPDATE_POST_JSON'"
 
 # Follow User
@@ -138,7 +140,7 @@ execute_curl "Get Comments" "curl -X GET '$API_URL/interactions/comments/$POST_I
 # API Info Controller
 echo "--- Executing Get Api Info Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Health Check" "curl -X GET '$API_URL/health'"
-execute_curl "API Info" "curl -X GET 'API\_URL/info'"
+execute_curl "API Info" "curl -X GET '$API_URL/info'"
 
 echo "--- Executing Update Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 GROUP_UPDATE_JSON='{"name": "Updated Group", "description": "Updated group description"}'
@@ -157,6 +159,25 @@ echo "--- Executing Get My Groups Test ---" && echo "Wait for sleep 3 seconds to
 execute_curl "Get My Groups" "curl -X GET '$API_URL/groups/my-groups' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Created Groups Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Created Groups" "curl -X GET '$API_URL/groups/created' -H 'Authorization: Bearer $TOKEN'"
+
+echo "--- Admin functionality tests below ---"
+echo "--- Executing Signup Admin Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
+signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "admin1@socio.com", "password": "A@pass1", "dateOfBirth": "1872-04-22T15:00:00Z"}')
+
+login_response=$(curl -k "$API_URL/auth/login" -X POST -H "Content-Type: application/json" -d '{"email": "admin1@socio.com", "password": "A@pass1"}')
+
+# Extract token
+TOKEN=$(echo "$login_response" | sed 's/{.*\"accessToken\":\"\([^\"]*\).*}/\1/g') # Extract token from previous response
+
+# Check if token retrieval was successful
+if [ -z "$TOKEN" ]; then
+  echo "Error: Failed to retrieve token."
+  echo "Login Response: $login_response"
+  exit 1
+fi
+
+echo "token = $TOKEN"
+
 echo "--- Executing Groups Ordered by Member Count Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Groups Ordered By Member Count" "curl -X GET '$API_URL/groups/stats/members' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Groups Ordered by Post Count Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
@@ -179,7 +200,7 @@ execute_curl "Get Posts Ordered By Engagement (Admin)" "curl -X GET '$API_URL/po
 echo "--- Executing Get Post Stats By Date Test (Admin) ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Post Stats By Date (Admin)" "curl -X GET '$API_URL/posts/stats/by-date' -H 'Authorization: Bearer $TOKEN'"
 
-echo "--- Executing Get Post Stats By User Test (Admin) ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
+echo "--- Executing Get Post Stats By User Tes (Admin) ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Post Stats By User (Admin)" "curl -X GET '$API_URL/posts/stats/by-user' -H 'Authorization: Bearer $TOKEN'"
 
 echo "--- Executing Get Post Stats By File Type Test (Admin) ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3

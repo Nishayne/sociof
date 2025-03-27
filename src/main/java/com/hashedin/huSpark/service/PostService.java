@@ -1,7 +1,10 @@
 package com.hashedin.huSpark.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,17 @@ public class PostService {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Transactional
+    public Group getGroupWithDetails(Long groupId) {
+        Group group = groupRepository.findByIdWithoutRelations(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Group not found with id: " + groupId));
+
+        groupRepository.findGroupWithMembers(groupId).ifPresent(g -> Hibernate.initialize(g.getMembers()));
+        groupRepository.findGroupWithPosts(groupId).ifPresent(g -> Hibernate.initialize(g.getPosts()));
+
+        return group;
+    }
+
     /**
      * Create a new post.
      * 
@@ -60,23 +74,28 @@ public class PostService {
     @CacheEvict(value = { "posts", "postStats" }, allEntries = true)
     public Post createPost(PostRequest postRequest, Long userId) {
         log.info("PostService: createPost: UserId: {}", userId);
-        
-        Group group = null;
+
         User user = userService.findById(userId);
+        Long groupId = postRequest.getGroupId();
         // If group ID is provided, check if user is a member of the group
-        if (postRequest.getGroupId() != null) {
-            group = groupRepository.findByIdWithMembers(postRequest.getGroupId())
+        Group group = groupRepository
+                .findById/* findByIdWithMembers *//* findGroupWithMembers */(groupId)
                 .orElseThrow(() -> {
-                    log.warn("Group not found with id: {}", postRequest.getGroupId());
-                    return new ResourceNotFoundException("Group not found with id: " + postRequest.getGroupId());
+                    log.warn("Group not found with id: {}", groupId);
+                    return new ResourceNotFoundException("Group not found with id: " + groupId);
                 });
 
-            // Check if user is a member of the group
-            // synchronization is no longer needed since group.getMembers() is now a CopyOnWriteArraySet.
-            // synchronized (group.getMembers()) { // Synchronize on the Array Set
-            if (!group.getMembers().contains(user)) {
+        // Check if user is a member of the group
+        // synchronization is no longer needed since group.getMembers() is now a
+        // CopyOnWriteArraySet.
+        // synchronized (group.getMembers()) { // Synchronize on the Array Set
+        // Clone the set to avoid modification issues
+        var users = group.getMembers();
+        if (!users.isEmpty()) {
+            Set<User> membersCopy = new HashSet<>(users);
+            if (!membersCopy.contains(user)) {
                 if (!group.getCreator().getId().equals(userId)) {
-                    log.warn("User {} is not a member of group {}.", userId, postRequest.getGroupId());
+                    log.warn("User {} is not a member of group {}.", userId, groupId);
                     throw new UnauthorizedException("You must be a member of the group to post");
                 }
             }
@@ -91,14 +110,11 @@ public class PostService {
                 .likes(0)
                 .build();
 
-        log.info("PostService: createPost: UserId: {}", post.getUser().getId());
-        log.info("PostService: createPost: Post Content: {}", post.getContent());
-            
+        log.info("PostService: createPost: UserId: {} Post Content: {}", post.getUser().getId(), post.getContent());
+
         // If group ID is provided, check if user is a member of the group
-        if (postRequest.getGroupId() != null && group != null) {
-            post.setGroup(group);
-            log.info("PostService: createPost: Group Id: {}", post.getGroup().getId());
-        }
+        post.setGroup(group);
+        log.info("PostService: createPost: Group Id: {}", post.getGroup().getId());
 
         Post savedPost = postRepository.saveAndFlush(post); // Changed from save to saveAndFlush
         log.info("Post created successfully: PostId: {}", savedPost.getId());

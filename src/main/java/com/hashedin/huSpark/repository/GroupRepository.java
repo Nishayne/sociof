@@ -19,7 +19,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     List<Group> findByCreatorId(Long creatorId);
 
-    @Query("SELECT g FROM Group g LEFT JOIN FETCH g.members LEFT JOIN FETCH g.posts WHERE g.id = :groupId")
+    @Query("SELECT distinct g FROM Group g LEFT JOIN FETCH g.members LEFT JOIN FETCH g.posts WHERE g.id = :groupId")
     Optional<Group> findByIdWithMembers(@Param("groupId") Long groupId);
 
     @Query("SELECT g FROM Group g LEFT JOIN FETCH g.members WHERE g.id IN (SELECT gm.id FROM Group gm JOIN gm.members m WHERE m.id = :userId)")
@@ -37,6 +37,15 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     @Query("SELECT new com.hashedin.huSpark.dto.GroupPostCountDTO(g, COUNT(p)) FROM Group g LEFT JOIN g.posts p GROUP BY g ORDER BY COUNT(p) DESC")
     Page<GroupPostCountDTO> findGroupsOrderedByPostCount(Pageable pageable);
+
+    @Query("SELECT g FROM Group g WHERE g.id = :groupId")
+    Optional<Group> findByIdWithoutRelations(@Param("groupId") Long groupId);
+
+    @Query("SELECT DISTINCT g FROM Group g LEFT JOIN FETCH g.members WHERE g.id = :groupId")
+    Optional<Group> findGroupWithMembers(@Param("groupId") Long groupId);
+
+    @Query("SELECT DISTINCT g FROM Group g LEFT JOIN FETCH g.posts WHERE g.id = :groupId")
+    Optional<Group> findGroupWithPosts(@Param("groupId") Long groupId);
 
     boolean existsByName(String name);
 }

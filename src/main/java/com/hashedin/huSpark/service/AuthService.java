@@ -18,6 +18,7 @@ import com.hashedin.huSpark.dto.AuthResponse;
 import com.hashedin.huSpark.dto.LoginRequest;
 import com.hashedin.huSpark.dto.PasswordResetRequest;
 import com.hashedin.huSpark.dto.SignUpRequest;
+import com.hashedin.huSpark.entity.Role;
 import com.hashedin.huSpark.entity.User;
 import com.hashedin.huSpark.exception.ResourceNotFoundException;
 import com.hashedin.huSpark.exception.UserAlreadyExistsException;
@@ -68,6 +69,7 @@ public class AuthService {
                 .isAdmin(isAdmin)
                 .isProfilePrivate(false)
                 .dateOfBirth(signUpRequest.getDateOfBirth())
+                .role(isAdmin?Role.ADMIN:Role.USER)
                 .passwordUpdatedAt(new Date())
                 .build();
 
