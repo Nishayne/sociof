@@ -28,7 +28,7 @@ mvn clean compile && mvn spring-boot:run
 sudo docker build -t socio:0.0.1 .
 # sudo docker run -p 127.0.0.1:8000:8000 socio:0.0.1
 # Run your Java application container
-sudo docker run --name socio --network my-network -p 8080:8080 socio:0.0.1
+sudo docker run --name socio --network my-network -e DB_HOST=mysql_container -p 8080:8080 socio:0.0.1
 
 # spring.profiles.active=local # in application.properties and that's the default file
 # else for docker can change to production to use application-production.properties 
