@@ -1,12 +1,15 @@
 package com.hashedin.huSpark.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +58,10 @@ public class PostController {
 
     /**
      * Constructor for PostController.
-     * @param postService Service for post operations.
+     * 
+     * @param postService  Service for post operations.
      * @param shareService Service for sharing posts.
-     * @param modelMapper Injected ModelMapper bean.
+     * @param modelMapper  Injected ModelMapper bean.
      */
     @Autowired
     public PostController(PostService postService, ShareService shareService, ModelMapper modelMapper) {
@@ -68,6 +72,7 @@ public class PostController {
 
     /**
      * Creates a new post.
+     * 
      * @param postRequest Post creation request.
      * @param currentUser Current authenticated user.
      * @return ResponseEntity containing the created PostDto or an error response.
@@ -97,7 +102,8 @@ public class PostController {
 
     /**
      * Shares a post.
-     * @param postId Post ID to share.
+     * 
+     * @param postId      Post ID to share.
      * @param currentUser Current authenticated user.
      * @return ResponseEntity containing the shared PostDto or an error response.
      */
@@ -122,14 +128,14 @@ public class PostController {
 
     /**
      * Shares a post with advanced options.
-     * @param postId ID of the post to share.
+     * 
+     * @param postId       ID of the post to share.
      * @param shareRequest Request with sharing options.
-     * @param currentUser Current authenticated user.
+     * @param currentUser  Current authenticated user.
      * @return ResponseEntity containing the shared PostDto or an error response.
      */
     @PostMapping("/{postId}/share/advanced")
-    @ApiOperation(value = "Share another user's post with advanced options",
-            notes = "Creates a customized share based on the provided options")
+    @ApiOperation(value = "Share another user's post with advanced options", notes = "Creates a customized share based on the provided options")
     public ResponseEntity<PostDto> sharePostAdvanced(
             @PathVariable Long postId,
             @RequestBody ShareRequest shareRequest,
@@ -150,6 +156,7 @@ public class PostController {
 
     /**
      * Retrieves a post by its ID.
+     * 
      * @param id Post ID.
      * @return ResponseEntity containing the PostDto or an error response.
      */
@@ -169,7 +176,8 @@ public class PostController {
 
     /**
      * Updates a post.
-     * @param id Post ID.
+     * 
+     * @param id          Post ID.
      * @param postRequest Post update request.
      * @param currentUser Current authenticated user.
      * @return ResponseEntity containing the updated PostDto or an error response.
@@ -196,7 +204,8 @@ public class PostController {
 
     /**
      * Delete a post
-     * @param id Post ID
+     * 
+     * @param id          Post ID
      * @param currentUser Current authenticated user
      * @return Deleted post, indicating successful deletion or an error response.
      */
@@ -216,9 +225,10 @@ public class PostController {
 
     /**
      * Get posts by user.
-     * @param userId User ID.
+     * 
+     * @param userId     User ID.
      * @param searchTerm Search term for filtering.
-     * @param pageable Pagination parameters.
+     * @param pageable   Pagination parameters.
      * @return Page of PostDto.
      */
     @GetMapping("/user/{userId}")
@@ -227,11 +237,28 @@ public class PostController {
             @PathVariable Long userId,
             @RequestParam(required = false) String searchTerm,
             Pageable pageable) {
-        try{
+        try {
             Page<Post> posts = postService.getPostsByUser(userId, searchTerm, pageable);
-            Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
-            return ResponseEntity.ok(postDtos);
-        }catch (Exception e){
+            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
+                        // Force loading of lazy collections
+            // Ensure lazy collections (comments & likes) are initialized
+            List<PostDto> postDtos = posts.stream().map(post -> {
+                try {
+                    Hibernate.initialize(post.getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(post.getPostLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(post, PostDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageable, posts.getTotalElements());
+
+            return ResponseEntity.ok(postDtoPage);
+        } catch (Exception e) {
             log.error("Failed to get posts by user: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -240,9 +267,10 @@ public class PostController {
 
     /**
      * Get posts by group.
-     * @param groupId Group ID.
+     * 
+     * @param groupId    Group ID.
      * @param searchTerm Search term for filtering.
-     * @param pageable Pagination parameters.
+     * @param pageable   Pagination parameters.
      * @return Page of PostDto.
      */
     @GetMapping("/group/{groupId}")
@@ -252,11 +280,28 @@ public class PostController {
             @RequestParam(required = false) String searchTerm,
             Pageable pageable) {
 
-        try{
+        try {
             Page<Post> posts = postService.getPostsByGroup(groupId, searchTerm, pageable);
-            Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
-            return ResponseEntity.ok(postDtos);
-        }catch (Exception e){
+            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
+                        // Force loading of lazy collections
+            // Ensure lazy collections (comments & likes) are initialized
+            List<PostDto> postDtos = posts.stream().map(post -> {
+                try {
+                    Hibernate.initialize(post.getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(post.getPostLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(post, PostDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageable, posts.getTotalElements());
+
+            return ResponseEntity.ok(postDtoPage);
+        } catch (Exception e) {
             log.error("Failed to get posts by group: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -265,8 +310,9 @@ public class PostController {
 
     /**
      * Get feed for current user.
+     * 
      * @param currentUser Current authenticated user.
-     * @param pageable Pagination parameters.
+     * @param pageable    Pagination parameters.
      * @return Page of PostDto.
      */
     @GetMapping("/feed")
@@ -274,20 +320,38 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> getFeed(
             @CurrentUser UserPrincipal currentUser,
             Pageable pageable) {
-        try{
+        try {
             Page<Post> posts = postService.getFeed(currentUser.getId(), pageable);
-            Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
-            return ResponseEntity.ok(postDtos);
-        }catch (Exception e){
+            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
+                        // Force loading of lazy collections
+            // Ensure lazy collections (comments & likes) are initialized
+            List<PostDto> postDtos = posts.stream().map(post -> {
+                try {
+                    Hibernate.initialize(post.getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(post.getPostLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(post, PostDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageable, posts.getTotalElements());
+
+            return ResponseEntity.ok(postDtoPage);
+        } catch (Exception e) {
             log.error("Failed to get feed: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
     }
 
-     /**
-     * Admin: Get All Posts 
-     * @param pageable Pagination parameters.
+    /**
+     * Admin: Get All Posts
+     * 
+     * @param pageable    Pagination parameters.
      * @param currentUser current authenticated/login user
      * @return Page of PostDto.
      */
@@ -297,22 +361,40 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> getAllPosts(
             Pageable pageable,
             @CurrentUser UserPrincipal currentUser) {
-        try{
-            Page<Post> posts = postService.getAllPosts(pageable,currentUser.getId());
+        try {
+            Page<Post> posts = postService.getAllPosts(pageable, currentUser.getId());
             // Use pre-configured modelMapper bean
             // Convert Page<Post> to Page<PostDto> properly
-            Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
-            return ResponseEntity.ok(postDtos);
-        }catch (Exception e){
+            // Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post,
+            // PostDto.class));
+            // Force loading of lazy collections
+            // Ensure lazy collections (comments & likes) are initialized
+            List<PostDto> postDtos = posts.stream().map(post -> {
+                try {
+                    Hibernate.initialize(post.getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(post.getPostLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(post, PostDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageable, posts.getTotalElements());
+
+            return ResponseEntity.ok(postDtoPage);
+        } catch (Exception e) {
             log.error("Failed to get all posts: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
     }
 
     /**
      * Get posts ordered by engagement.
-     * @param pageable Pagination parameters.
+     * 
+     * @param pageable    Pagination parameters.
      * @param currentUser current authenticated/login user
      * @return Page of PostDto.
      */
@@ -320,12 +402,29 @@ public class PostController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get posts ordered by engagement (Admin only)")
     public ResponseEntity<Page<PostDto>> getPostsOrderedByEngagement(Pageable pageable,
-                                                                            @CurrentUser UserPrincipal currentUser) {
-        try{
-            Page<Post> posts = postService.getPostsOrderedByEngagement(pageable,currentUser.getId());
-            Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
-            return ResponseEntity.ok(postDtos);
-        }catch (Exception e){
+            @CurrentUser UserPrincipal currentUser) {
+        try {
+            Page<Post> posts = postService.getPostsOrderedByEngagement(pageable, currentUser.getId());
+            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
+                        // Force loading of lazy collections
+            // Ensure lazy collections (comments & likes) are initialized
+            List<PostDto> postDtos = posts.stream().map(post -> {
+                try {
+                    Hibernate.initialize(post.getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(post.getPostLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(post, PostDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<PostDto> postDtoPage = new PageImpl<>(postDtos, pageable, posts.getTotalElements());
+
+            return ResponseEntity.ok(postDtoPage);
+        } catch (Exception e) {
             log.error("Failed to get posts ordered by engagement: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -334,6 +433,7 @@ public class PostController {
 
     /**
      * Get post statistics by date.
+     * 
      * @param currentUser current authenticated/login user
      * @return List of objects containing date and count.
      */
@@ -352,6 +452,7 @@ public class PostController {
 
     /**
      * Get post statistics by user.
+     * 
      * @param currentUser current authenticated/login user
      * @return List of objects containing user ID and count.
      */
@@ -370,6 +471,7 @@ public class PostController {
 
     /**
      * Get post statistics by file type.
+     * 
      * @param currentUser current authenticated/login user
      * @return List of objects containing file type and count.
      */

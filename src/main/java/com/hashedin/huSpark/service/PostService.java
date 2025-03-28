@@ -29,10 +29,13 @@ import com.hashedin.huSpark.repository.GroupRepository;
 import com.hashedin.huSpark.repository.LikeRepository;
 import com.hashedin.huSpark.repository.PostRepository;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * Service for post-related operations.
  */
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final Logger log = LoggerFactory.getLogger(PostService.class);
@@ -238,6 +241,7 @@ public class PostService {
      * @param pageable   Pagination parameters
      * @return Page of posts
      */
+    @Transactional(readOnly = true) // Ensure Hibernate session remains open
     @Cacheable(value = "posts", key = "'user_' + #userId + '_search_' + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<Post> getPostsByUser(Long userId, String searchTerm, Pageable pageable) {
         log.info("PostService: getPostsByUser: UserId: {}, SearchTerm: {}, Pageable: {}", userId, searchTerm, pageable);
@@ -259,6 +263,7 @@ public class PostService {
      * @param pageable   Pagination parameters
      * @return Page of posts
      */
+    @Transactional(readOnly = true) // Ensure Hibernate session remains open
     @Cacheable(value = "posts", key = "'group_' + #groupId + '_search_' + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<Post> getPostsByGroup(Long groupId, String searchTerm, Pageable pageable) {
         log.info("PostService: getPostsByGroup: GroupId: {}, SearchTerm: {}, Pageable: {}", groupId, searchTerm,
@@ -280,6 +285,8 @@ public class PostService {
      * @param pageable Pagination parameters
      * @return Page of posts visible to current user
      */
+    @Transactional(readOnly = true) // Ensures Hibernate session remains open
+    @Cacheable(value = "posts", key = "'user_' + #userId + '_page_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<Post> getFeed(Long userId, Pageable pageable) {
         log.info("PostService: getFeed: UserId: {}, Pageable: {}", userId, pageable);
         Page<Post> feed = postRepository.findVisiblePosts(userId, pageable);

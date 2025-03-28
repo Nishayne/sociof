@@ -146,8 +146,6 @@ execute_curl "API Info" "curl -X GET '$API_URL/info'"
 echo "--- Executing Update Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 GROUP_UPDATE_JSON='{"name": "Updated Group", "description": "Updated group description"}'
 execute_curl "Update Group" "curl -X PUT '$API_URL/groups/$GROUP_ID' -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '$GROUP_UPDATE_JSON'"
-echo "--- Executing Delete Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Delete Group" "curl -X DELETE '$API_URL/groups/$GROUP_ID' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Add User to Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Add User To Group" "curl -X POST '$API_URL/groups/$GROUP_ID/members/2' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Remove User to Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
@@ -249,3 +247,6 @@ execute_curl "Get All Users" "curl -X GET '$API_URL/users' -H 'Authorization: Be
 
 echo "--- Executing Get Users Ordered By Follower Count Test (Admin) ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Users Ordered By Follower Count (Admin)" "curl -X GET '$API_URL/users/stats/followers' -H 'Authorization: Bearer $TOKEN'"
+
+echo "--- Executing Delete Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
+execute_curl "Delete Group" "curl -X DELETE '$API_URL/groups/$GROUP_ID' -H 'Authorization: Bearer $TOKEN'"

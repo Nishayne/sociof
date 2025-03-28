@@ -28,11 +28,16 @@ public class ModelMapperConfig {
         Converter<Set<Like>, Integer> likeCountConverter = ctx -> 
             (ctx.getSource() == null) ? 0 : ctx.getSource().size();
 
+        // Ensure originalPostId and originalUserId are mapped properly
+        Converter<Long, Long> originalIdConverter = ctx -> ctx.getSource() == null ? 0L : ctx.getSource();
+
         // Apply Converters
         TypeMap<Post, PostDto> typeMap = modelMapper.createTypeMap(Post.class, PostDto.class);
         typeMap.addMappings(mapper -> {
             mapper.using(commentCountConverter).map(Post::getComments, PostDto::setComments);
             mapper.using(likeCountConverter).map(Post::getPostLikes, PostDto::setLikes);
+            mapper.using(originalIdConverter).map(Post::getOriginalPostId, PostDto::setOriginalPostId);
+            mapper.using(originalIdConverter).map(Post::getOriginalUserId, PostDto::setOriginalUserId);
         });
 
         return modelMapper;

@@ -5,7 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Repository;
 import com.hashedin.huSpark.dto.GroupMemberCountDTO;
 import com.hashedin.huSpark.dto.GroupPostCountDTO;
 import com.hashedin.huSpark.entity.Group;
+
+import jakarta.transaction.Transactional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
@@ -76,4 +80,23 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findGroupWithPosts(@Param("groupId") Long groupId);
 
     boolean existsByName(String name);
+
+    @EntityGraph(attributePaths = {"creator"}) // Ensure `creator` is fetched eagerly
+    @Query("SELECT g FROM Group g WHERE g.id = :id")
+    Optional<Group> findByIdWithCreator(@Param("id") Long id);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Post p WHERE p.group.id = :groupId")
+    void deletePostsByGroupId(@Param("groupId") Long groupId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM group_members WHERE group_id = :groupId", nativeQuery = true)
+    void deleteGroupMembers(@Param("groupId") Long groupId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Report r WHERE r.post.id IN (SELECT p.id FROM Post p WHERE p.group.id = :groupId)")
+    void deleteReportsByGroupId(@Param("groupId") Long groupId);
 }

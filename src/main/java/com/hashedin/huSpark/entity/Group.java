@@ -70,7 +70,7 @@ public class Group {
     @JsonIgnore // Prevent recursion
     private Set<User> members = new /*CopyOnWriteArraySet*/HashSet<>();
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for posts,  Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval=true) // testing change back to LAZY, Eager loading for posts,  Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
     private Set<Post> posts = new /*CopyOnWriteArraySet*/HashSet<>();
 

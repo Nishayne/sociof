@@ -82,7 +82,7 @@ public class GroupService {
      */
     public Group findById(Long id) {
         log.info("GroupService: findById: GroupId: {}", id);
-        return groupRepository.findById(id)
+        return groupRepository.findByIdWithCreator(id)
                 .orElseThrow(() -> {
                     log.warn("Group not found with id: {}", id);
                     return new ResourceNotFoundException("Group not found with id: " + id);
@@ -131,15 +131,39 @@ public class GroupService {
     @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
     public void deleteGroup(Long id, Long userId) {
         log.info("GroupService: deleteGroup: GroupId: {}, UserId: {}", id, userId);
+
+        // Fetch group with creator eagerly loaded
         Group group = findById(id);
 
         // Check if current user is the creator or an admin
+        // Fetch user separately to avoid modifying the entity inside the transaction
         User currentUser = userService.findById(userId);
-        if (!currentUser.getIsAdmin() && !group.getCreator().getId().equals(userId)) {
+        
+        // Check permissions
+        Long creatorId = group.getCreator().getId(); // This will not throw LazyInitializationException
+        if (!currentUser.getIsAdmin() && !creatorId.equals(userId)) { // This will not throw LazyInitializationException
             log.warn("User {} does not have permission to delete group {}.", userId, id);
             throw new UnauthorizedException("You do not have permission to delete this group");
         }
 
+        // Delete all relationships before deleting the group
+        log.info("Deleting related entities for group {} before deletion", id);
+
+        // Step 1: Delete reports related to posts in the group
+        groupRepository.deleteReportsByGroupId(id);
+
+        // Step 2: Delete posts belonging to the group
+        groupRepository.deletePostsByGroupId(id);
+
+        // Step 3: Delete group members
+        groupRepository.deleteGroupMembers(id);
+        
+        // Step 4: Clear relationships to prevent errors
+        group.getMembers().clear();  // Remove members safely
+        group.getPosts().clear();    // Remove posts safely
+        groupRepository.saveAndFlush(group); // Ensure changes are persisted
+        
+        // Step 5: Now delete the group safely
         groupRepository.delete(group);
         log.info("Group deleted successfully: GroupId: {}", id);
     }

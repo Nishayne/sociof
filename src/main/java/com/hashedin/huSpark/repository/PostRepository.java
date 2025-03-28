@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +18,12 @@ import com.hashedin.huSpark.entity.Post;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    Page<Post> findByUserId(Long userId, Pageable pageable);
+    @EntityGraph(attributePaths = {"comments", "postLikes"})
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
+    Page<Post> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"comments", "postLikes"})
+    @Query("SELECT p FROM Post p WHERE p.group.id = :groupId")
     Page<Post> findByGroupId(Long groupId, Pageable pageable);
 
     // Search posts by a specific user with a search term
@@ -34,7 +39,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> searchGroupPosts(@Param("groupId") Long groupId, @Param("searchTerm") String searchTerm, Pageable pageable);
 
     // Fetch only visible posts for a user (Optimized to avoid subqueries)
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.user LEFT JOIN FETCH p.group WHERE (p.user.isProfilePrivate = false OR p.user.id = :currentUserId OR p.user.id IN " +
+    @EntityGraph(attributePaths = {"comments", "postLikes"})
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.user LEFT JOIN FETCH p.group WHERE (p.user.isProfilePrivate = false " +
+            "OR p.user.id = :currentUserId OR p.user.id IN " +
             "(SELECT f.following.id FROM Follow f WHERE f.follower.id = :currentUserId)) AND " +
             "(p.group IS NULL OR p.group.isPrivate = false OR p.group.id IN " +
             "(SELECT g.id FROM Group g JOIN g.members m WHERE m.id = :currentUserId)) ORDER BY p.createdAt DESC")
