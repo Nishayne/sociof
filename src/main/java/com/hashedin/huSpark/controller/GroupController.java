@@ -300,16 +300,18 @@ public class GroupController {
     /**
      * Retrieves groups ordered by member count (Admin only).
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a page of Object[] or an error response.
      */
     @GetMapping("/stats/members")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get groups ordered by member count (Admin only)")
-    public ResponseEntity<Page<GroupMemberCountDTO>> getGroupsOrderedByMemberCount(Pageable pageable) {
+    public ResponseEntity<Page<GroupMemberCountDTO>> getGroupsOrderedByMemberCount(Pageable pageable,
+                                @CurrentUser UserPrincipal currentUser) {
         log.info("GroupController: getGroupsOrderedByMemberCount");
 
         try {
-            Page<GroupMemberCountDTO> groups = groupService.getGroupsOrderedByMemberCount(pageable);
+            Page<GroupMemberCountDTO> groups = groupService.getGroupsOrderedByMemberCount(pageable,currentUser.getId());
             return ResponseEntity.ok(groups);
         } catch (Exception e) {
             log.error("Failed to get groups by member count: " + e.getMessage(), e);
@@ -320,16 +322,18 @@ public class GroupController {
     /**
      * Retrieves groups ordered by post count (Admin only).
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a page of groups with post count or an error response.
      */
     @GetMapping("/stats/posts")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get groups ordered by post count (Admin only)")
-    public ResponseEntity<Page<GroupPostCountDTO>> getGroupsOrderedByPostCount(Pageable pageable) {
+    public ResponseEntity<Page<GroupPostCountDTO>> getGroupsOrderedByPostCount(Pageable pageable,
+                                                                    @CurrentUser UserPrincipal currentUser) {
         log.info("GroupController: getGroupsOrderedByPostCount");
 
         try {
-            Page<GroupPostCountDTO> groups = groupService.getGroupsOrderedByPostCount(pageable);
+            Page<GroupPostCountDTO> groups = groupService.getGroupsOrderedByPostCount(pageable,currentUser.getId());
             return ResponseEntity.ok(groups);
         } catch (Exception e) {
             log.error("Failed to get groups by post count: " + e.getMessage(), e);

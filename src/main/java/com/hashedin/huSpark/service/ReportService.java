@@ -74,11 +74,20 @@ public class ReportService {
     /**
      * Find a report by ID.
      * @param id ID of report to find
+     * @param currentUserId loginUser 
      * @return Report
      * @throws ResourceNotFoundException if report is not found
      */
-    public Report findById(Long id) {
+    public Report findById(Long id, Long currentUserId) {
         log.info("ReportService: findById: ReportId: {}", id);
+
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByMemberCount.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getGroupsOrderedByMemberCount");
+        } 
+    
         return reportRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Report not found with id: {}", id);
@@ -98,14 +107,14 @@ public class ReportService {
     public Report moderateReport(Long id, boolean approved, Long moderatorId) {
         log.info("ReportService: moderateReport: ReportId: {}, Approved: {}, ModeratorId: {}", id, approved, moderatorId);
 
-        Report report = findById(id);
-
         // Check if current user is an admin
         User moderator = userService.findById(moderatorId);
         if (!moderator.getIsAdmin()) {
             log.warn("User {} is not authorized to moderate reports.", moderatorId);
             throw new UnauthorizedException("Only admins can moderate reports");
         }
+
+        Report report = findById(id, moderatorId);
 
         // Update report status
         report.setStatus(approved ? ReportStatus.APPROVED : ReportStatus.REJECTED);
@@ -127,10 +136,19 @@ public class ReportService {
      * Get all reports.
      * @param status Optional status filter
      * @param pageable Pagination parameters
+     * @param currentUserId current authenicated/loggedIn userId
      * @return Page of reports
      */
-    public Page<Report> getAllReports(ReportStatus status, Pageable pageable) {
+    public Page<Report> getAllReports(ReportStatus status, Pageable pageable, Long currentUserId) {
         log.info("ReportService: getAllReports: Status: {}, Pageable: {}", status, pageable);
+        
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getAllReports.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getAllReports");
+        } 
+    
         Page<Report> reports;
         if (status != null) {
             reports = reportRepository.findByStatus(status, pageable);
@@ -144,10 +162,19 @@ public class ReportService {
     /**
      * Get reports for a post.
      * @param postId ID of post
+     * @param currentUserId current authenticated/login User
      * @return List of reports
      */
-    public List<Report> getReportsByPost(Long postId) {
+    public List<Report> getReportsByPost(Long postId, Long currentUserId) {
         log.info("ReportService: getReportsByPost: PostId: {}", postId);
+
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getReportsByPost.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getReportsByPost");
+        } 
+
         List<Report> reports = reportRepository.findByPostId(postId);
         log.info("Found {} reports for post {}.", reports.size(), postId);
         return reports;
@@ -179,11 +206,20 @@ public class ReportService {
 
     /**
      * Get report statistics by creation date.
+     * @param currentUserId current login/authenticated user
      * @return List of objects containing date and count
      */
     @Cacheable(value = "reportStats", key = "'byDate'")
-    public List<Object[]> getReportStatsByDate() {
+    public List<Object[]> getReportStatsByDate(Long currentUserId) {
         log.info("ReportService: getReportStatsByDate");
+
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getReportStatsByDate.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getReportStatsByDate");
+        } 
+
         List<Object[]> stats = reportRepository.countReportsByCreationDate();
         log.info("Found {} report stats by date.", stats.size());
         return stats;
@@ -191,11 +227,19 @@ public class ReportService {
 
     /**
      * Get report statistics by user.
+     * @param currentUserId current loggedin/authenticated user
      * @return List of objects containing user ID and count
      */
     @Cacheable(value = "reportStats", key = "'byUser'")
-    public List<Object[]> getReportStatsByUser() {
+    public List<Object[]> getReportStatsByUser(Long currentUserId) {
         log.info("ReportService: getReportStatsByUser");
+
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getReportStatsByUser.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getReportStatsByUser");
+        } 
         List<Object[]> stats = reportRepository.countReportsByUser();
         log.info("Found {} report stats by user.", stats.size());
         return stats;
@@ -203,11 +247,20 @@ public class ReportService {
 
     /**
      * Get report statistics by file type.
+     * @param currentUserId authenticated/login user
      * @return List of objects containing file type and count
      */
     @Cacheable(value = "reportStats", key = "'byFileType'")
-    public List<Object[]> getReportStatsByFileType() {
+    public List<Object[]> getReportStatsByFileType(Long currentUserId) {
         log.info("ReportService: getReportStatsByFileType");
+
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getReportStatsByFileType.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getReportStatsByFileType");
+        } 
+
         List<Object[]> stats = reportRepository.countReportsByFileType();
         log.info("Found {} report stats by file type.", stats.size());
         return stats;

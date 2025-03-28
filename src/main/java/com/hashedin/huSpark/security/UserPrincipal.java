@@ -54,6 +54,11 @@ public class UserPrincipal implements UserDetails {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
+        /*
+         * Spring Security checks roles with the default "ROLE_" prefix. 
+         * If your UserDetails implementation stores roles as "ADMIN", then:
+         * Fix: Change hasRole('ADMIN') → hasAuthority('ROLE_ADMIN')
+         */
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         log.info("UserPrincipal created for user: {}", user.getEmail());

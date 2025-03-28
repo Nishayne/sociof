@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hashedin.huSpark.dto.CommentRequestDto;
 import com.hashedin.huSpark.entity.Comment;
 import com.hashedin.huSpark.entity.Like;
 import com.hashedin.huSpark.entity.Post;
@@ -122,7 +123,7 @@ public class InteractionService {
      */
     @Transactional
     @CacheEvict(value = {"posts", "postStats"}, allEntries = true)
-    public Comment addComment(Long postId, Long userId, String content) {
+    public Comment addComment(Long postId, Long userId, CommentRequestDto content) {
         log.info("InteractionService: addComment: PostId: {}, UserId: {}", postId, userId);
 
         Post post = postRepository.findById(postId)
@@ -137,7 +138,7 @@ public class InteractionService {
         Comment comment = Comment.builder()
                 .post(post)
                 .user(user)
-                .content(content)
+                .content(content.getContent())
                 .build();
 
         Comment savedComment = commentRepository.saveAndFlush(comment); // Changed from save to saveAndFlush

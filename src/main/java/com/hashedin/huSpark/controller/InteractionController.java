@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hashedin.huSpark.dto.CommentDto;
+import com.hashedin.huSpark.dto.CommentRequestDto;
 import com.hashedin.huSpark.entity.Comment;
 import com.hashedin.huSpark.security.CurrentUser;
 import com.hashedin.huSpark.security.UserPrincipal;
@@ -26,7 +27,7 @@ import com.hashedin.huSpark.service.InteractionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+
 
 /**
  * Controller for interaction operations (likes, comments).
@@ -111,12 +112,12 @@ public class InteractionController {
     @ApiOperation("Add a comment to a post")
     public ResponseEntity<CommentDto> addComment(
             @PathVariable Long postId,
-            @Valid @RequestBody @NotBlank String content,
+            @Valid @RequestBody CommentRequestDto commentRequestDto,
             @CurrentUser UserPrincipal currentUser) {
         log.info("InteractionController: comment: UserId: " + currentUser.getId());
 
         try {
-            Comment comment = interactionService.addComment(postId, currentUser.getId(), content);
+            Comment comment = interactionService.addComment(postId, currentUser.getId(), commentRequestDto);
             return ResponseEntity.ok(modelMapper.map(comment, CommentDto.class));
         } catch (IllegalArgumentException e) {
             log.warn("Failed to add comment: " + e.getMessage());

@@ -80,7 +80,7 @@ CREATE_REPORT_JSON='{"justification": "Test Report Justification", "postId": '"$
 create_report_response=$(curl -X POST "$API_URL/reports" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "$CREATE_REPORT_JSON")
 
 # Extract Report ID
-REPORT_ID=$(echo "$create_report_response" | sed 's/{.*\"id\":\"\([^\"]*\).*}/\1/g') # Extract report ID from previous response
+REPORT_ID=$(echo "$create_report_response" | sed 's/{.*"id":\([^,]*\).*}/\1/g') # Extract report ID from previous response
 
 if [ -z "$REPORT_ID" ]; then
     echo "Error: Failed to retrieve REPORT_ID."
@@ -106,6 +106,7 @@ execute_curl "Update Post" "curl -X PUT '$API_URL/posts/$POST_ID' -H 'Authorizat
 # Follow User
 echo "--- Executing Follow User Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 USER_ID_TO_FOLLOW=2 # Replace with the user ID to follow
+execute_curl "Follow User" "curl -X POST '$API_URL/follows/1' -H 'Authorization: Bearer $TOKEN'"
 execute_curl "Follow User" "curl -X POST '$API_URL/follows/$USER_ID_TO_FOLLOW' -H 'Authorization: Bearer $TOKEN'"
 
 # Unfollow User

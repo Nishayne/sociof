@@ -77,14 +77,17 @@ public class PostService {
 
         User user = userService.findById(userId);
         Long groupId = postRequest.getGroupId();
+
+        // potential circular dependency
+        // User →(is part of) Group →(has) Group Members → User →(creates) Post
+        // →(references) Group
         // If group ID is provided, check if user is a member of the group
         Group group = groupRepository
-                .findById/* findByIdWithMembers *//* findGroupWithMembers */(groupId)
+                .findByIdWithoutRelations/* findById *//* findByIdWithMembers *//* findGroupWithMembers */(groupId)
                 .orElseThrow(() -> {
                     log.warn("Group not found with id: {}", groupId);
                     return new ResourceNotFoundException("Group not found with id: " + groupId);
                 });
-
         // Check if user is a member of the group
         // synchronization is no longer needed since group.getMembers() is now a
         // CopyOnWriteArraySet.
@@ -228,22 +231,6 @@ public class PostService {
     }
 
     /**
-     * Admin Delete a post.
-     * 
-     * @param id     ID of post to delete
-     * @param userId ID of user deleting the post
-     */
-    @Transactional
-    @CacheEvict(value = { "posts", "postStats" }, allEntries = true)
-    public void deletePost(Long id) {
-        log.info("PostService: adminDeletePost: PostId: {}", id);
-        Post post = findById(id);
-
-        postRepository.delete(post);
-        log.info("Post deleted successfully by admin: PostId: {}", id);
-    }
-
-    /**
      * Get posts by user
      * 
      * @param userId     ID of user to get posts for
@@ -304,14 +291,32 @@ public class PostService {
      * Admin only: Get feed for all users
      * 
      * @param pageable Pagination parameters
+     * @currentUserId current authenthicated loggedin User
      * @return Page of posts visible to current user
      *         findAll is not for user, since user visible Posts are always specific
      *         to current user,
      *         hence for Users use findVisiblePosts instead of findAll
      */
-    public Page<Post> getAllPosts(Pageable pageable) {
+    @Transactional(readOnly = true) // 🔹 Ensures Hibernate session remains open
+    public Page<Post> getAllPosts(Pageable pageable, Long currentUserId) {
         log.info("PostService: getAllPosts: Pageable: {}", pageable);
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getAllPosts.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getAllPosts");
+        }
         Page<Post> allPosts = postRepository.findAll(pageable);
+        // Force loading of lazy collections
+        allPosts.forEach(post -> {
+            try {
+                Hibernate.initialize(post.getComments());
+            } catch (Exception e) {
+            }
+            try {
+                Hibernate.initialize(post.getPostLikes());
+            } catch (Exception e) {
+            }
+        });
         log.info("Found {} all posts.", allPosts.getTotalElements());
         return allPosts;
     }
@@ -319,12 +324,20 @@ public class PostService {
     /**
      * Get posts ordered by engagement (likes and comments)
      * 
-     * @param pageable Pagination parameters
+     * @param pageable      Pagination parameters
+     * @param currentUserId loginuser parameter
      * @return Page of posts
      */
     @Cacheable(value = "postStats", key = "'engagement_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-    public Page<Post> getPostsOrderedByEngagement(Pageable pageable) {
+    public Page<Post> getPostsOrderedByEngagement(Pageable pageable, Long currentUserId) {
         log.info("PostService: getPostsOrderedByEngagement: Pageable: {}", pageable);
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getPostsOrderedByEngagement.",
+                    currentUserId);
+            throw new UnauthorizedException(
+                    "Unauthorized access: You do not have permission to getPostsOrderedByEngagement");
+        }
         Page<Post> orderedPosts = postRepository.findPostsOrderedByEngagement(pageable);
         log.info("Found {} posts ordered by engagement.", orderedPosts.getTotalElements());
         return orderedPosts;
@@ -333,11 +346,17 @@ public class PostService {
     /**
      * Get statistics about posts grouped by creation date
      * 
+     * @currentUserId loginUser parameter
      * @return List of objects containing date and count
      */
     @Cacheable(value = "postStats", key = "'byDate'")
-    public List<PostCreationDateDTO> getPostStatsByDate() {
+    public List<PostCreationDateDTO> getPostStatsByDate(Long currentUserId) {
         log.info("PostService: getPostStatsByDate");
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getPostStatsByDate.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getPostStatsByDate");
+        }
         List<PostCreationDateDTO> stats = postRepository.countPostsByCreationDate();
         log.info("Found {} post stats by date.", stats.size());
         return stats;
@@ -346,11 +365,19 @@ public class PostService {
     /**
      * Get statistics about posts grouped by user
      * 
+     * @param currentUserId loginUser parameter
      * @return List of objects containing user ID and count
      */
     @Cacheable(value = "postStats", key = "'byUser'")
-    public List<UserPostCountDTO> getPostStatsByUser() {
+    public List<UserPostCountDTO> getPostStatsByUser(Long currentUserId) {
         log.info("PostService: getPostStatsByUser");
+
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getPostStatsByUser.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getPostStatsByUser");
+        }
+
         List<UserPostCountDTO> stats = postRepository.countPostsByUser();
         log.info("Found {} post stats by user.", stats.size());
         return stats;
@@ -359,11 +386,20 @@ public class PostService {
     /**
      * Get statistics about posts grouped by file type
      * 
+     * @currentUserId loginUser @parameter
      * @return List of objects containing file type and count
      */
     @Cacheable(value = "postStats", key = "'byFileType'")
-    public List<PostFileTypeCountDTO> getPostStatsByFileType() {
+    public List<PostFileTypeCountDTO> getPostStatsByFileType(Long currentUserId) {
         log.info("PostService: getPostStatsByFileType");
+
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getPostStatsByFileType.", currentUserId);
+            throw new UnauthorizedException(
+                    "Unauthorized access: You do not have permission to getPostStatsByFileType");
+        }
+
         List<PostFileTypeCountDTO> stats = postRepository.countPostsByFileType();
         log.info("Found {} post stats by file type.", stats.size());
         return stats;

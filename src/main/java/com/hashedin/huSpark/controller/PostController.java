@@ -195,28 +195,10 @@ public class PostController {
     }
 
     /**
-     * Admin: Deletes a post.
-     * @param id Post ID.
-     * @return ResponseEntity indicating successful deletion or an error response.
-     */
-    @DeleteMapping("/{id}/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ApiOperation("Delete a post")
-    public ResponseEntity<?> deletePost(@PathVariable Long id) {
-        try {
-            postService.deletePost(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error("Failed to delete post (admin): " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    /**
      * Delete a post
      * @param id Post ID
      * @param currentUser Current authenticated user
-     * @return Deleted post
+     * @return Deleted post, indicating successful deletion or an error response.
      */
     @DeleteMapping("/{id}")
     @ApiOperation("Delete a post")
@@ -306,15 +288,19 @@ public class PostController {
      /**
      * Admin: Get All Posts 
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return Page of PostDto.
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get All Posts")
     public ResponseEntity<Page<PostDto>> getAllPosts(
-            Pageable pageable) {
+            Pageable pageable,
+            @CurrentUser UserPrincipal currentUser) {
         try{
-            Page<Post> posts = postService.getAllPosts(pageable);
+            Page<Post> posts = postService.getAllPosts(pageable,currentUser.getId());
+            // Use pre-configured modelMapper bean
+            // Convert Page<Post> to Page<PostDto> properly
             Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
             return ResponseEntity.ok(postDtos);
         }catch (Exception e){
@@ -327,14 +313,16 @@ public class PostController {
     /**
      * Get posts ordered by engagement.
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return Page of PostDto.
      */
     @GetMapping("/stats/engagement")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get posts ordered by engagement (Admin only)")
-    public ResponseEntity<Page<PostDto>> getPostsOrderedByEngagement(Pageable pageable) {
+    public ResponseEntity<Page<PostDto>> getPostsOrderedByEngagement(Pageable pageable,
+                                                                            @CurrentUser UserPrincipal currentUser) {
         try{
-            Page<Post> posts = postService.getPostsOrderedByEngagement(pageable);
+            Page<Post> posts = postService.getPostsOrderedByEngagement(pageable,currentUser.getId());
             Page<PostDto> postDtos = posts.map(post -> modelMapper.map(post, PostDto.class));
             return ResponseEntity.ok(postDtos);
         }catch (Exception e){
@@ -346,14 +334,15 @@ public class PostController {
 
     /**
      * Get post statistics by date.
+     * @param currentUser current authenticated/login user
      * @return List of objects containing date and count.
      */
     @GetMapping("/stats/by-date")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get post statistics by date (Admin only)")
-    public ResponseEntity<List<PostCreationDateDTO>> getPostStatsByDate() {
+    public ResponseEntity<List<PostCreationDateDTO>> getPostStatsByDate(@CurrentUser UserPrincipal currentUser) {
         try {
-            List<PostCreationDateDTO> stats = postService.getPostStatsByDate();
+            List<PostCreationDateDTO> stats = postService.getPostStatsByDate(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get post statistics by date: " + e.getMessage(), e);
@@ -363,14 +352,15 @@ public class PostController {
 
     /**
      * Get post statistics by user.
+     * @param currentUser current authenticated/login user
      * @return List of objects containing user ID and count.
      */
     @GetMapping("/stats/by-user")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get post statistics by user (Admin only)")
-    public ResponseEntity<List<UserPostCountDTO>> getPostStatsByUser() {
+    public ResponseEntity<List<UserPostCountDTO>> getPostStatsByUser(@CurrentUser UserPrincipal currentUser) {
         try {
-            List<UserPostCountDTO> stats = postService.getPostStatsByUser();
+            List<UserPostCountDTO> stats = postService.getPostStatsByUser(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get post statistics by user: " + e.getMessage(), e);
@@ -380,15 +370,16 @@ public class PostController {
 
     /**
      * Get post statistics by file type.
+     * @param currentUser current authenticated/login user
      * @return List of objects containing file type and count.
      */
     @GetMapping("/stats/by-file-type")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get post statistics by file type (Admin only)")
-    public ResponseEntity<List<PostFileTypeCountDTO>> getPostStatsByFileType() {
+    public ResponseEntity<List<PostFileTypeCountDTO>> getPostStatsByFileType(@CurrentUser UserPrincipal currentUser) {
         log.info("PostController: getPostStatsByFileType");
         try {
-            List<PostFileTypeCountDTO> stats = postService.getPostStatsByFileType();
+            List<PostFileTypeCountDTO> stats = postService.getPostStatsByFileType(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get post statistics by file type: " + e.getMessage(), e);

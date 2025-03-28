@@ -3,12 +3,14 @@ package com.hashedin.huSpark.entity;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -55,20 +57,32 @@ public class Group {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @ManyToMany(fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @ManyToMany(fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @JoinTable(
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @Builder.Default
+    @JsonIgnore // Prevent recursion
     private Set<User> members = new /*CopyOnWriteArraySet*/HashSet<>();
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // testing change back to LAZY, Eager loading for posts,  Prevent ConcurrentModificationException and Manage Cyclic Dependencies
     @Builder.Default
     private Set<Post> posts = new /*CopyOnWriteArraySet*/HashSet<>();
 
-    public Set<User> getMembers() {
+    public synchronized Set<User> getMembers() {
+        try {
+            if (!Hibernate.isInitialized(this.members)) {
+                Hibernate.initialize(this.members); // 🔹 Ensure members are fully loaded
+            }
+        } catch (Exception e) {
+            //log.error("Error initializing members for group {}: {}", this.id, e.getMessage(), e);
+            //Hide exception due to ConcurrentModification exception 
+        }
         log.info("Accessing members for group: {}", this.id);
         return members;
     }

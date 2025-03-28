@@ -165,7 +165,7 @@ public class UserController {
      * @return ResponseEntity containing a list of UserDto or an error response.
      */
     @PostMapping("/bulk-import")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Bulk import users (Admin only)")
     public ResponseEntity<List<UserDto>> bulkImportUsers(
             @RequestParam("file") MultipartFile file,
@@ -186,15 +186,16 @@ public class UserController {
     /**
      * Retrieves users ordered by follower count.
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a page of Object[] or an error response.
      */
     @GetMapping("/stats/followers")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get users ordered by follower count (Admin only)")
-    public ResponseEntity<Page<Object[]>> getUsersOrderedByFollowerCount(Pageable pageable) {
+    public ResponseEntity<Page<Object[]>> getUsersOrderedByFollowerCount(Pageable pageable, @CurrentUser UserPrincipal currentUser) {
         log.info("UserController: getUsersOrderedByFollowerCount: pageSize: " + pageable.getPageSize());
         try {
-            Page<Object[]> users = userService.getUsersOrderedByFollowerCount(pageable);
+            Page<Object[]> users = userService.getUsersOrderedByFollowerCount(pageable, currentUser.getId());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             log.error("Failed to get users ordered by follower count: " + e.getMessage(), e);

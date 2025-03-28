@@ -97,23 +97,38 @@ public class User  implements UserDetails{
 
     private Date passwordUpdatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                                    // and Manage Cyclic Dependencies
+                                                    // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                            // Post →(references) Group
     @Builder.Default
     private Set<Post> posts = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Follow> following = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "following", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "following", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Follow> followers = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Group> createdGroups = new CopyOnWriteArraySet<>();
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Group> memberGroups = new CopyOnWriteArraySet<>();
 

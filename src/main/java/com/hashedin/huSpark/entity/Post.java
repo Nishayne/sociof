@@ -7,6 +7,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,21 +57,31 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference // Prevent circular serialization
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "group_id")
+    @ManyToOne(fetch = FetchType.LAZY) // Lazy load to avoid circular loading
+    @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Comment> comments = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Like> postLikes = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Testing, change back to Lazy, Eager loading for members, Prevent ConcurrentModificationException and Manage Cyclic Dependencies
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+                                        // and Manage Cyclic Dependencies
+                                        // User →(is part of) Group →(has) Group Members → User →(creates) 
+                                                                                                // Post →(references) Group
     @Builder.Default
     private Set<Report> reports = new CopyOnWriteArraySet<>();
 

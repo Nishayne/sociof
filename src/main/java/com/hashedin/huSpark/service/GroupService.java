@@ -262,11 +262,18 @@ public class GroupService {
     /**
      * Get groups ordered by member count.
      * @param pageable Pagination parameters
+     * @param currentUserId loginuser parameter
      * @return Page of groups with member count
      */
      @Cacheable(value = "groupStats", key = "'memberCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-    public Page<GroupMemberCountDTO> getGroupsOrderedByMemberCount(Pageable pageable) {
+    public Page<GroupMemberCountDTO> getGroupsOrderedByMemberCount(Pageable pageable, Long currentUserId) {
         log.info("GroupService: getGroupsOrderedByMemberCount: Pageable: {}", pageable);
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByMemberCount.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getGroupsOrderedByMemberCount");
+        } 
         Page<GroupMemberCountDTO> orderedGroups = groupRepository.findGroupsOrderedByMemberCount(pageable);
         log.info("Found {} groups ordered by member count.", orderedGroups.getTotalElements());
         return orderedGroups;
@@ -275,11 +282,18 @@ public class GroupService {
     /**
      * Get groups ordered by post count.
      * @param pageable Pagination parameters
+     * @param currentUserId loginuser parameter
      * @return Page of groups with post count
      */
     @Cacheable(value = "groupStats", key = "'postCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-    public Page<GroupPostCountDTO> getGroupsOrderedByPostCount(Pageable pageable) {
+    public Page<GroupPostCountDTO> getGroupsOrderedByPostCount(Pageable pageable, Long currentUserId) {
         log.info("GroupService: getGroupsOrderedByPostCount: Pageable: {}", pageable);
+        User currentUser = userService.findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByPostCount.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getGroupsOrderedByPostCount");
+        } 
         Page<GroupPostCountDTO> orderedGroups = groupRepository.findGroupsOrderedByPostCount(pageable);
         log.info("Found {} groups ordered by post count.", orderedGroups.getTotalElements());
         return orderedGroups;

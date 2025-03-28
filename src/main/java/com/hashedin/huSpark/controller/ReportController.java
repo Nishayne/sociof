@@ -79,15 +79,16 @@ public class ReportController {
     /**
      * Retrieves a report by its ID.
      * @param id Report ID.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing the ReportDto or an error response.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get a report by ID (Admin only)")
-    public ResponseEntity<ReportDto> getReportById(@PathVariable Long id) {
+    public ResponseEntity<ReportDto> getReportById(@PathVariable Long id,  @CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportById: ReportId: " + id);
         try {
-            Report report = reportService.findById(id);
+            Report report = reportService.findById(id, currentUser.getId());
             return ResponseEntity.ok(modelMapper.map(report, ReportDto.class));
         } catch (Exception e) {
             log.error("Failed to get report by ID: " + e.getMessage(), e);
@@ -103,7 +104,7 @@ public class ReportController {
      * @return ResponseEntity containing the moderated ReportDto or an error response.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Moderate a report (Admin only)")
     public ResponseEntity<ReportDto> moderateReport(
             @PathVariable Long id,
@@ -123,17 +124,18 @@ public class ReportController {
      * Retrieves all reports.
      * @param status Optional status filter.
      * @param pageable Pagination parameters.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a page of ReportDto or an error response.
      */
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get all reports (Admin only)")
     public ResponseEntity<Page<ReportDto>> getAllReports(
             @RequestParam(required = false) ReportStatus status,
-            Pageable pageable) {
+            Pageable pageable, @CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getAllReports: Status: " + status);
         try {
-            Page<Report> reports = reportService.getAllReports(status, pageable);
+            Page<Report> reports = reportService.getAllReports(status, pageable, currentUser.getId());
             Page<ReportDto> reportDtos = reports.map(report -> modelMapper.map(report, ReportDto.class));
             return ResponseEntity.ok(reportDtos);
         } catch (Exception e) {
@@ -145,15 +147,17 @@ public class ReportController {
     /**
      * Retrieves reports for a post.
      * @param postId Post ID.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a list of ReportDto or an error response.
      */
     @GetMapping("/post/{postId}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get reports for a post (Admin only)")
-    public ResponseEntity<List<ReportDto>> getReportsByPost(@PathVariable Long postId) {
+    public ResponseEntity<List<ReportDto>> getReportsByPost(@PathVariable Long postId, 
+                                                    @CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportsByPost: PostId: " + postId);
         try {
-            List<Report> reports = reportService.getReportsByPost(postId);
+            List<Report> reports = reportService.getReportsByPost(postId,currentUser.getId());
             List<ReportDto> reportDtos = reports.stream()
                     .map(report -> modelMapper.map(report, ReportDto.class))
                     .collect(Collectors.toList());
@@ -166,15 +170,16 @@ public class ReportController {
 
     /**
      * Retrieves report statistics by date.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a list of objects containing date and count or an error response.
      */
     @GetMapping("/stats/by-date")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get report statistics by date (Admin only)")
-    public ResponseEntity<List<Object[]>> getReportStatsByDate() {
+    public ResponseEntity<List<Object[]>> getReportStatsByDate(@CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportStatsByDate");
         try {
-            List<Object[]> stats = reportService.getReportStatsByDate();
+            List<Object[]> stats = reportService.getReportStatsByDate(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get report statistics by date: " + e.getMessage(), e);
@@ -184,15 +189,16 @@ public class ReportController {
 
     /**
      * Retrieves report statistics by user.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a list of objects containing user ID and count or an error response.
      */
     @GetMapping("/stats/by-user")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get report statistics by user (Admin only)")
-    public ResponseEntity<List<Object[]>> getReportStatsByUser() {
+    public ResponseEntity<List<Object[]>> getReportStatsByUser(@CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportStatsByUser");
         try {
-            List<Object[]> stats = reportService.getReportStatsByUser();
+            List<Object[]> stats = reportService.getReportStatsByUser(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get report statistics by user: " + e.getMessage(), e);
@@ -202,15 +208,16 @@ public class ReportController {
 
     /**
      * Retrieves report statistics by file type.
+     * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a list of objects containing file type and count or an error response.
      */
     @GetMapping("/stats/by-file-type")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get report statistics by file type (Admin only)")
-    public ResponseEntity<List<Object[]>> getReportStatsByFileType() {
+    public ResponseEntity<List<Object[]>> getReportStatsByFileType(@CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportStatsByFileType");
         try {
-            List<Object[]> stats = reportService.getReportStatsByFileType();
+            List<Object[]> stats = reportService.getReportStatsByFileType(currentUser.getId());
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Failed to get report statistics by file type: " + e.getMessage(), e);

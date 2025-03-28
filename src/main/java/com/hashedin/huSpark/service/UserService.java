@@ -224,11 +224,20 @@ public class UserService {
     /**
      * Get users ordered by follower count
      * @param pageable Pagination parameters
+     * @param currentUserId loginUser/authenticated user
      * @return Page of user DTOs with follower count
      */
     @Cacheable(value = "userStats", key = "'followerCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-    public Page<Object[]> getUsersOrderedByFollowerCount(Pageable pageable) {
+    public Page<Object[]> getUsersOrderedByFollowerCount(Pageable pageable, Long currentUserId) {
         log.info("UserService: getUsersOrderedByFollowerCount: Pageable: {}", pageable);
+
+        User currentUser = findById(currentUserId); 
+        if (!currentUser.getIsAdmin())
+        {
+            log.warn("Unauthorized access: User {} does not have permission to getUsersOrderedByFollowerCount.", currentUserId);
+            throw new UnauthorizedException("Unauthorized access: You do not have permission to getUsersOrderedByFollowerCount");
+        }
+
         Page<Object[]> users = followRepository.findUsersOrderedByFollowerCount(pageable);
         log.info("Found {} users ordered by follower count.", users.getTotalElements());
         return users;
