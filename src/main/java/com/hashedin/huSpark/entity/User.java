@@ -34,6 +34,8 @@ import lombok.Setter;
  * Entity representing a user in the SOCIO platform
  */
 
+ /*@Data includes @Getter and @Setter, but also generates equals() and hashCode(), 
+ which can cause issues with entities using @OneToMany and @ManyToMany */
 @Entity
 @Getter
 @Setter
@@ -59,6 +61,7 @@ public class User  implements UserDetails{
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(() -> "ROLE_" + role.name());
+        //return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -97,35 +100,35 @@ public class User  implements UserDetails{
 
     private Date passwordUpdatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                                     // and Manage Cyclic Dependencies
                                                     // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                             // Post →(references) Group
     @Builder.Default
     private Set<Post> posts = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group
     @Builder.Default
     private Set<Follow> following = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "following", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group
     @Builder.Default
     private Set<Follow> followers = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group
     @Builder.Default
     private Set<Group> createdGroups = new CopyOnWriteArraySet<>();
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @ManyToMany(mappedBy = "members", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group

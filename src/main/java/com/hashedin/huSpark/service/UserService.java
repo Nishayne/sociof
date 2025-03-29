@@ -140,7 +140,9 @@ public class UserService {
             throw new UnauthorizedException("You do not have permission to delete this user");
         }
 
-        userRepository.delete(user);
+        userRepository.deleteGroupMembersByUserId(id);
+
+        userRepository.delete(user); // Now delete the user
         log.info("User deleted successfully: UserId: {}", id);
     }
 

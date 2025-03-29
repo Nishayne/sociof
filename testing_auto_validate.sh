@@ -10,8 +10,30 @@ API_URL="http://localhost:8080/api"
 # Login and get the token
 echo "--- Executing Signup Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "test1@test.com", "password": "pass1", "dateOfBirth": "2023-04-22T15:00:00Z"}')
+# Extract userId
+USER_ID=$(echo "$signup_response" | sed 's/{.*"id":\([^,]*\).*}/\1/g') # Extract userid from previous response
 
-signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "test2@test.com", "password": "pass1", "dateOfBirth": "2023-04-22T15:00:00Z"}')
+# Check if userid retrieval was successful
+if [ -z "$USER_ID" ]; then
+  echo "Error: Failed to retrieve userId."
+  echo "Signup Response: $signup_response"
+  exit 1
+fi
+
+echo "userId = $USER_ID"
+
+signup_response=$(curl -k "$API_URL/auth/signup" -X POST -H "Content-Type: application/json" -d '{"email": "test2@test.com", "password": "pass2", "dateOfBirth": "2023-04-22T15:00:00Z"}')
+# Extract userId
+USER_ID=$(echo "$signup_response" | sed 's/{.*"id":\([^,]*\).*}/\1/g') # Extract userid from previous response
+
+# Check if userid retrieval was successful
+if [ -z "$USER_ID" ]; then
+  echo "Error: Failed to retrieve userId."
+  echo "Signup Response: $signup_response"
+  exit 1
+fi
+
+echo "userId = $USER_ID"
 
 login_response=$(curl -k "$API_URL/auth/login" -X POST -H "Content-Type: application/json" -d '{"email": "test1@test.com", "password": "pass1"}')
 
@@ -147,9 +169,9 @@ echo "--- Executing Update Group Test ---" && echo "Wait for sleep 3 seconds to 
 GROUP_UPDATE_JSON='{"name": "Updated Group", "description": "Updated group description"}'
 execute_curl "Update Group" "curl -X PUT '$API_URL/groups/$GROUP_ID' -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '$GROUP_UPDATE_JSON'"
 echo "--- Executing Add User to Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Add User To Group" "curl -X POST '$API_URL/groups/$GROUP_ID/members/2' -H 'Authorization: Bearer $TOKEN'"
+execute_curl "Add User To Group" "curl -X POST '$API_URL/groups/$GROUP_ID/members/$USER_ID' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Remove User to Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Remove User From Group" "curl -X DELETE '$API_URL/groups/$GROUP_ID/members/2' -H 'Authorization: Bearer $TOKEN'"
+execute_curl "Remove User From Group" "curl -X DELETE '$API_URL/groups/$GROUP_ID/members/$USER_ID' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Get All Groups Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get All Groups" "curl -X GET '$API_URL/groups' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Get Visible Groups Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
@@ -183,7 +205,7 @@ echo "--- Executing Groups Ordered by Post Count Test ---" && echo "Wait for sle
 execute_curl "Get Groups Ordered By Post Count" "curl -X GET '$API_URL/groups/stats/posts' -H 'Authorization: Bearer $TOKEN'"
 
 echo "--- Executing Get Posts By User Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Get Posts By User" "curl -X GET '$API_URL/posts/user/2' -H 'Authorization: Bearer $TOKEN'"
+execute_curl "Get Posts By User" "curl -X GET '$API_URL/posts/user/$USER_ID' -H 'Authorization: Bearer $TOKEN'"
 echo "--- Executing Get Posts By Group Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get Posts By Group" "curl -X GET '$API_URL/posts/group/$GROUP_ID' -H 'Authorization: Bearer $TOKEN'"
 
@@ -233,14 +255,14 @@ echo "--- Executing Get Current User Test ---" && echo "Wait for sleep 3 seconds
 execute_curl "Get Current User" "curl -X GET '$API_URL/users/me' -H 'Authorization: Bearer $TOKEN'"
 
 echo "--- Executing Get User By ID Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Get User By ID" "curl -X GET '$API_URL/users/2' -H 'Authorization: Bearer $TOKEN'"
+execute_curl "Get User By ID" "curl -X GET '$API_URL/users/$USER_ID' -H 'Authorization: Bearer $TOKEN'"
 
 echo "--- Executing Update User Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 UPDATE_USER_JSON='{"firstName": "UpdatedFirstName", "lastName": "UpdatedLastName"}'
-execute_curl "Update User" "curl -X PUT '$API_URL/users/2' -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '$UPDATE_USER_JSON'"
+execute_curl "Update User" "curl -X PUT '$API_URL/users/$USER_ID' -H 'Authorization: Bearer $TOKEN' -H 'Content-Type: application/json' -d '$UPDATE_USER_JSON'"
 
 echo "--- Executing Delete User Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
-execute_curl "Delete User" "curl -X DELETE '$API_URL/users/2' -H 'Authorization: Bearer $TOKEN'"
+execute_curl "Delete User" "curl -X DELETE '$API_URL/users/$USER_ID' -H 'Authorization: Bearer $TOKEN'"
 
 echo "--- Executing Get All Users Test ---" && echo "Wait for sleep 3 seconds to continue ..." && sleep 3
 execute_curl "Get All Users" "curl -X GET '$API_URL/users' -H 'Authorization: Bearer $TOKEN'"

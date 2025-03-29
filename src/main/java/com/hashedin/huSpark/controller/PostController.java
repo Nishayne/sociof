@@ -239,8 +239,9 @@ public class PostController {
             Pageable pageable) {
         try {
             Page<Post> posts = postService.getPostsByUser(userId, searchTerm, pageable);
-            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
-                        // Force loading of lazy collections
+            // Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post,
+            // PostDto.class));
+            // Force loading of lazy collections
             // Ensure lazy collections (comments & likes) are initialized
             List<PostDto> postDtos = posts.stream().map(post -> {
                 try {
@@ -282,8 +283,9 @@ public class PostController {
 
         try {
             Page<Post> posts = postService.getPostsByGroup(groupId, searchTerm, pageable);
-            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
-                        // Force loading of lazy collections
+            // Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post,
+            // PostDto.class));
+            // Force loading of lazy collections
             // Ensure lazy collections (comments & likes) are initialized
             List<PostDto> postDtos = posts.stream().map(post -> {
                 try {
@@ -322,8 +324,9 @@ public class PostController {
             Pageable pageable) {
         try {
             Page<Post> posts = postService.getFeed(currentUser.getId(), pageable);
-            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
-                        // Force loading of lazy collections
+            // Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post,
+            // PostDto.class));
+            // Force loading of lazy collections
             // Ensure lazy collections (comments & likes) are initialized
             List<PostDto> postDtos = posts.stream().map(post -> {
                 try {
@@ -405,8 +408,9 @@ public class PostController {
             @CurrentUser UserPrincipal currentUser) {
         try {
             Page<Post> posts = postService.getPostsOrderedByEngagement(pageable, currentUser.getId());
-            //Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post, PostDto.class));
-                        // Force loading of lazy collections
+            // Page<PostDto> postDtoPage = posts.map(post -> modelMapper.map(post,
+            // PostDto.class));
+            // Force loading of lazy collections
             // Ensure lazy collections (comments & likes) are initialized
             List<PostDto> postDtos = posts.stream().map(post -> {
                 try {

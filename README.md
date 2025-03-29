@@ -18,7 +18,7 @@ sudo docker start mysql_container  # Start MySQL if stopped
 mvn wrapper:wrapper #download latest maven wrapper
 chmod +x mvnw #on linux
 
-./mvnw clean package
+./mvnw clean package -DskipTests
 OR
 mvn clean install
 

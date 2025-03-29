@@ -29,7 +29,7 @@ public class Report {
     private ReportStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @ManyToOne

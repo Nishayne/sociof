@@ -3,11 +3,13 @@ package com.hashedin.huSpark.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +37,8 @@ import jakarta.validation.Valid;
 
 /**
  * Controller for report operations.
- * Handles reporting posts, moderating reports, and retrieving report information.
+ * Handles reporting posts, moderating reports, and retrieving report
+ * information.
  */
 @RestController
 @RequestMapping("/api/reports")
@@ -48,6 +51,7 @@ public class ReportController {
 
     /**
      * Constructor for ReportController.
+     * 
      * @param reportService Service for report operations.
      */
     @Autowired
@@ -57,8 +61,9 @@ public class ReportController {
 
     /**
      * Reports a post.
+     * 
      * @param reportRequest Report request.
-     * @param currentUser Current authenticated user.
+     * @param currentUser   Current authenticated user.
      * @return ResponseEntity containing the created ReportDto or an error response.
      */
     @PostMapping
@@ -77,15 +82,15 @@ public class ReportController {
     }
 
     /**
-     * Retrieves a report by its ID.
-     * @param id Report ID.
+     * Retrieves a report by its ID. 
+     * @param id          Report ID.
      * @param currentUser current authenticated/login user
      * @return ResponseEntity containing the ReportDto or an error response.
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get a report by ID (Admin only)")
-    public ResponseEntity<ReportDto> getReportById(@PathVariable Long id,  @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<ReportDto> getReportById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportById: ReportId: " + id);
         try {
             Report report = reportService.findById(id, currentUser.getId());
@@ -98,10 +103,11 @@ public class ReportController {
 
     /**
      * Moderates a report.
-     * @param id Report ID.
-     * @param approved Whether to approve or reject the report.
+     * @param id          Report ID.
+     * @param approved    Whether to approve or reject the report.
      * @param currentUser Current authenticated user.
-     * @return ResponseEntity containing the moderated ReportDto or an error response.
+     * @return ResponseEntity containing the moderated ReportDto or an error
+     *         response.
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -121,9 +127,9 @@ public class ReportController {
     }
 
     /**
-     * Retrieves all reports.
-     * @param status Optional status filter.
-     * @param pageable Pagination parameters.
+     * Retrieves all reports. 
+     * @param status      Optional status filter.
+     * @param pageable    Pagination parameters.
      * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a page of ReportDto or an error response.
      */
@@ -136,8 +142,25 @@ public class ReportController {
         log.info("ReportController: getAllReports: Status: " + status);
         try {
             Page<Report> reports = reportService.getAllReports(status, pageable, currentUser.getId());
-            Page<ReportDto> reportDtos = reports.map(report -> modelMapper.map(report, ReportDto.class));
-            return ResponseEntity.ok(reportDtos);
+            // Page<ReportDto> reportDtoPage = reports.map(report -> modelMapper.map(report,
+            // ReportDto.class));
+
+            List<ReportDto> reportDtos = reports.stream().map(report -> {
+                try {
+                    Hibernate.initialize(report.getPost().getComments());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(report.getPost().getLikes());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(report, ReportDto.class);
+            }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<ReportDto> reportDtoPage = new PageImpl<>(reportDtos, pageable, reports.getTotalElements());
+
+            return ResponseEntity.ok(reportDtoPage);
         } catch (Exception e) {
             log.error("Failed to get all reports: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -146,18 +169,18 @@ public class ReportController {
 
     /**
      * Retrieves reports for a post.
-     * @param postId Post ID.
+     * @param postId      Post ID.
      * @param currentUser current authenticated/login user
      * @return ResponseEntity containing a list of ReportDto or an error response.
      */
     @GetMapping("/post/{postId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @ApiOperation("Get reports for a post (Admin only)")
-    public ResponseEntity<List<ReportDto>> getReportsByPost(@PathVariable Long postId, 
-                                                    @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<List<ReportDto>> getReportsByPost(@PathVariable Long postId,
+            @CurrentUser UserPrincipal currentUser) {
         log.info("ReportController: getReportsByPost: PostId: " + postId);
         try {
-            List<Report> reports = reportService.getReportsByPost(postId,currentUser.getId());
+            List<Report> reports = reportService.getReportsByPost(postId, currentUser.getId());
             List<ReportDto> reportDtos = reports.stream()
                     .map(report -> modelMapper.map(report, ReportDto.class))
                     .collect(Collectors.toList());
@@ -171,7 +194,8 @@ public class ReportController {
     /**
      * Retrieves report statistics by date.
      * @param currentUser current authenticated/login user
-     * @return ResponseEntity containing a list of objects containing date and count or an error response.
+     * @return ResponseEntity containing a list of objects containing date and count
+     *         or an error response.
      */
     @GetMapping("/stats/by-date")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -190,7 +214,8 @@ public class ReportController {
     /**
      * Retrieves report statistics by user.
      * @param currentUser current authenticated/login user
-     * @return ResponseEntity containing a list of objects containing user ID and count or an error response.
+     * @return ResponseEntity containing a list of objects containing user ID and
+     *         count or an error response.
      */
     @GetMapping("/stats/by-user")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -209,7 +234,8 @@ public class ReportController {
     /**
      * Retrieves report statistics by file type.
      * @param currentUser current authenticated/login user
-     * @return ResponseEntity containing a list of objects containing file type and count or an error response.
+     * @return ResponseEntity containing a list of objects containing file type and
+     *         count or an error response.
      */
     @GetMapping("/stats/by-file-type")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

@@ -39,21 +39,22 @@ public class GroupService {
     /**
      * Create a new group.
      * @param groupRequest Group creation request
-     * @param creatorId ID of user creating the group
+     * @param creatorId    ID of user creating the group
      * @return Created group
      */
     @Transactional
-    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
+    @CacheEvict(value = { "groups_", "groupStats" }, allEntries = true)
     public Group createGroup(GroupRequest groupRequest, Long creatorId) {
         log.info("GroupService: createGroup: CreatorId: {}", creatorId);
         User creator = userService.findById(creatorId);
 
-        //check if same group name already exists
-        //if yes throw IllegalArgumentException
+        // check if same group name already exists
+        // if yes throw IllegalArgumentException
         // Check if a group with the same name already exists
         if (groupRepository.existsByName(groupRequest.getName())) {
             log.warn("Group with name '{}' already exists.", groupRequest.getName());
-            throw new ResourceAlreadyExistsException("Group with name '" + groupRequest.getName() + "' already exists.");
+            throw new ResourceAlreadyExistsException(
+                    "Group with name '" + groupRequest.getName() + "' already exists.");
         }
         Group group = Group.builder()
                 .name(groupRequest.getName())
@@ -76,6 +77,7 @@ public class GroupService {
 
     /**
      * Find a group by ID.
+     * 
      * @param id ID of group to find
      * @return Group
      * @throws ResourceNotFoundException if group is not found
@@ -91,13 +93,14 @@ public class GroupService {
 
     /**
      * Update a group.
-     * @param id ID of group to update
+     * 
+     * @param id           ID of group to update
      * @param groupRequest Group update request
-     * @param userId ID of user updating the group
+     * @param userId       ID of user updating the group
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
+    @CacheEvict(value = { "groups_", "groupStats" }, allEntries = true)
     public Group updateGroup(Long id, GroupRequest groupRequest, Long userId) {
         log.info("GroupService: updateGroup: GroupId: {}, UserId: {}", id, userId);
         Group group = findById(id);
@@ -124,11 +127,12 @@ public class GroupService {
 
     /**
      * Delete a group.
-     * @param id ID of group to delete
+     * 
+     * @param id     ID of group to delete
      * @param userId ID of user deleting the group
      */
     @Transactional
-    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
+    @CacheEvict(value = { "groups_", "groupStats" }, allEntries = true)
     public void deleteGroup(Long id, Long userId) {
         log.info("GroupService: deleteGroup: GroupId: {}, UserId: {}", id, userId);
 
@@ -138,7 +142,7 @@ public class GroupService {
         // Check if current user is the creator or an admin
         // Fetch user separately to avoid modifying the entity inside the transaction
         User currentUser = userService.findById(userId);
-        
+
         // Check permissions
         Long creatorId = group.getCreator().getId(); // This will not throw LazyInitializationException
         if (!currentUser.getIsAdmin() && !creatorId.equals(userId)) { // This will not throw LazyInitializationException
@@ -157,12 +161,12 @@ public class GroupService {
 
         // Step 3: Delete group members
         groupRepository.deleteGroupMembers(id);
-        
+
         // Step 4: Clear relationships to prevent errors
-        group.getMembers().clear();  // Remove members safely
-        group.getPosts().clear();    // Remove posts safely
+        group.getMembers().clear(); // Remove members safely
+        group.getPosts().clear(); // Remove posts safely
         groupRepository.saveAndFlush(group); // Ensure changes are persisted
-        
+
         // Step 5: Now delete the group safely
         groupRepository.delete(group);
         log.info("Group deleted successfully: GroupId: {}", id);
@@ -170,15 +174,17 @@ public class GroupService {
 
     /**
      * Add a user to a group.
-     * @param groupId ID of group
-     * @param userId ID of user to add
+     * 
+     * @param groupId       ID of group
+     * @param userId        ID of user to add
      * @param currentUserId ID of current user
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
+    @CacheEvict(value = { "groups_", "groupStats" }, allEntries = true)
     public Group addUserToGroup(Long groupId, Long userId, Long currentUserId) {
-        log.info("GroupService: addUserToGroup: GroupId: {}, UserId: {}, CurrentUserId: {}", groupId, userId, currentUserId);
+        log.info("GroupService: addUserToGroup: GroupId: {}, UserId: {}, CurrentUserId: {}", groupId, userId,
+                currentUserId);
         Group group = findById(groupId);
         User user = userService.findById(userId);
 
@@ -199,15 +205,17 @@ public class GroupService {
 
     /**
      * Remove a user from a group.
-     * @param groupId ID of group
-     * @param userId ID of user to remove
+     * 
+     * @param groupId       ID of group
+     * @param userId        ID of user to remove
      * @param currentUserId ID of current user
      * @return Updated group
      */
     @Transactional
-    @CacheEvict(value = {"groups_", "groupStats"}, allEntries = true)
+    @CacheEvict(value = { "groups_", "groupStats" }, allEntries = true)
     public Group removeUserFromGroup(Long groupId, Long userId, Long currentUserId) {
-        log.info("GroupService: removeUserFromGroup: GroupId: {}, UserId: {}, CurrentUserId: {}", groupId, userId, currentUserId);
+        log.info("GroupService: removeUserFromGroup: GroupId: {}, UserId: {}, CurrentUserId: {}", groupId, userId,
+                currentUserId);
         Group group = findById(groupId);
         User user = userService.findById(userId);
 
@@ -228,8 +236,9 @@ public class GroupService {
 
     /**
      * Get all groups.
+     * 
      * @param searchTerm Search term for filtering
-     * @param pageable Pagination parameters
+     * @param pageable   Pagination parameters
      * @return Page of groups
      */
     @Cacheable(value = "groups_", key = "'all_search_' + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
@@ -244,9 +253,11 @@ public class GroupService {
         log.info("Found {} groups.", groups.getTotalElements());
         return groups;
     }
-/**
+
+    /**
      * Get visible groups for a user.
-     * @param userId ID of user
+     * 
+     * @param userId   ID of user
      * @param pageable Pagination parameters
      * @return Page of groups visible to the user
      */
@@ -259,6 +270,7 @@ public class GroupService {
 
     /**
      * Get groups where user is a member.
+     * 
      * @param userId ID of user
      * @return List of groups
      */
@@ -272,6 +284,7 @@ public class GroupService {
 
     /**
      * Get groups created by a user.
+     * 
      * @param userId ID of user
      * @return List of groups
      */
@@ -285,19 +298,21 @@ public class GroupService {
 
     /**
      * Get groups ordered by member count.
-     * @param pageable Pagination parameters
+     * 
+     * @param pageable      Pagination parameters
      * @param currentUserId loginuser parameter
      * @return Page of groups with member count
      */
-     @Cacheable(value = "groupStats", key = "'memberCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    @Cacheable(value = "groupStats", key = "'memberCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<GroupMemberCountDTO> getGroupsOrderedByMemberCount(Pageable pageable, Long currentUserId) {
         log.info("GroupService: getGroupsOrderedByMemberCount: Pageable: {}", pageable);
-        User currentUser = userService.findById(currentUserId); 
-        if (!currentUser.getIsAdmin())
-        {
-            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByMemberCount.", currentUserId);
-            throw new UnauthorizedException("Unauthorized access: You do not have permission to getGroupsOrderedByMemberCount");
-        } 
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByMemberCount.",
+                    currentUserId);
+            throw new UnauthorizedException(
+                    "Unauthorized access: You do not have permission to getGroupsOrderedByMemberCount");
+        }
         Page<GroupMemberCountDTO> orderedGroups = groupRepository.findGroupsOrderedByMemberCount(pageable);
         log.info("Found {} groups ordered by member count.", orderedGroups.getTotalElements());
         return orderedGroups;
@@ -305,19 +320,21 @@ public class GroupService {
 
     /**
      * Get groups ordered by post count.
-     * @param pageable Pagination parameters
+     * 
+     * @param pageable      Pagination parameters
      * @param currentUserId loginuser parameter
      * @return Page of groups with post count
      */
     @Cacheable(value = "groupStats", key = "'postCount_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<GroupPostCountDTO> getGroupsOrderedByPostCount(Pageable pageable, Long currentUserId) {
         log.info("GroupService: getGroupsOrderedByPostCount: Pageable: {}", pageable);
-        User currentUser = userService.findById(currentUserId); 
-        if (!currentUser.getIsAdmin())
-        {
-            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByPostCount.", currentUserId);
-            throw new UnauthorizedException("Unauthorized access: You do not have permission to getGroupsOrderedByPostCount");
-        } 
+        User currentUser = userService.findById(currentUserId);
+        if (!currentUser.getIsAdmin()) {
+            log.warn("Unauthorized access: User {} does not have permission to getGroupsOrderedByPostCount.",
+                    currentUserId);
+            throw new UnauthorizedException(
+                    "Unauthorized access: You do not have permission to getGroupsOrderedByPostCount");
+        }
         Page<GroupPostCountDTO> orderedGroups = groupRepository.findGroupsOrderedByPostCount(pageable);
         log.info("Found {} groups ordered by post count.", orderedGroups.getTotalElements());
         return orderedGroups;

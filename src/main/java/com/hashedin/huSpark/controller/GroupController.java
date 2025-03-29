@@ -3,11 +3,13 @@ package com.hashedin.huSpark.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ import com.hashedin.huSpark.dto.GroupDto;
 import com.hashedin.huSpark.dto.GroupMemberCountDTO;
 import com.hashedin.huSpark.dto.GroupPostCountDTO;
 import com.hashedin.huSpark.dto.GroupRequest; // Import GroupDto
+import com.hashedin.huSpark.dto.ReportDto;
 import com.hashedin.huSpark.entity.Group;
 import com.hashedin.huSpark.security.CurrentUser;
 import com.hashedin.huSpark.security.UserPrincipal;
@@ -222,8 +225,24 @@ public class GroupController {
 
         try {
             Page<Group> groups = groupService.getAllGroups(searchTerm, pageable);
-            Page<GroupDto> groupDtos = groups.map(group -> modelMapper.map(group, GroupDto.class));
-            return ResponseEntity.ok(groupDtos);
+            //Page<GroupDto> groupDtos = groups.map(group -> modelMapper.map(group, GroupDto.class));
+
+            List<GroupDto> groupDtos = groups.stream().map(group -> {
+                try {
+                    Hibernate.initialize(group.getPosts());
+                } catch (Exception e) {
+                }
+                try {
+                    Hibernate.initialize(group.getMembers());
+                } catch (Exception e) {
+                }
+                return modelMapper.map(group, GroupDto.class);
+                }).collect(Collectors.toList());
+
+            // Return correctly paginated response
+            Page<GroupDto> groupDtoPage = new PageImpl<>(groupDtos, pageable, groups.getTotalElements());
+
+            return ResponseEntity.ok(groupDtoPage);
         } catch (Exception e) {
             log.error("Failed to get all groups: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

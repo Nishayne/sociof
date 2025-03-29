@@ -64,21 +64,21 @@ public class Post {
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group
     @Builder.Default
     private Set<Comment> comments = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group
     @Builder.Default
     private Set<Like> postLikes = new CopyOnWriteArraySet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) // change LAZY vs Eager loading for members, Prevent ConcurrentModificationException 
                                         // and Manage Cyclic Dependencies
                                         // User →(is part of) Group →(has) Group Members → User →(creates) 
                                                                                                 // Post →(references) Group

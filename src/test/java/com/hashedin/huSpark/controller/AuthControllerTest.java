@@ -2,26 +2,37 @@ package com.hashedin.huSpark.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hashedin.huSpark.dto.SignUpRequest;
+import com.hashedin.huSpark.dto.UserDto;
 import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.exception.UserAlreadyExistsException;
+import com.hashedin.huSpark.repository.UserRepository;
 import com.hashedin.huSpark.service.AuthService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,10 +42,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for the AuthController
  */
-@WebMvcTest(AuthController.class)
 // @SpringBootTest
+//@AutoConfigureMockMvc
+/*@WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc
-//@ActiveProfiles("test")
+@ActiveProfiles("test")  // Loads in-memory DB settings
+@Import(AuthService.class)  // Ensures AuthService is loaded
+@MockBean(AuthService.class) 
+@MockBean(UserRepository.class)  // Prevents real DB calls
+@MockBean(JpaRepositoriesAutoConfiguration.class) // Prevents DB loading*/
 public class AuthControllerTest {
 
     @Autowired
@@ -47,12 +63,69 @@ public class AuthControllerTest {
     private AuthService authService;
 
 
-    @Autowired
+    @MockBean
+    private UserRepository userRepository; // Mock the database dependency
+
+    @InjectMocks
+    private AuthController authController;
+
+    /*@Autowired
     private WebApplicationContext webApplicationContext;
 
     @BeforeEach
     public void setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }*/
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+    }
+
+    @Test
+    public void testRegisterUser2_Success() {
+        // Arrange
+        SignUpRequest request = SignUpRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .dateOfBirth(new Date())
+                .build();
+
+        User mockUser = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .password("encodedPassword")
+                .isAdmin(false)
+                .build();
+
+        when(authService.registerUser(any(SignUpRequest.class))).thenReturn(mockUser);
+
+        // Act
+        ResponseEntity<UserDto> response = authController.registerUser(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("test@example.com", response.getBody().getEmail());
+    }
+
+    @Test
+    public void testRegisterUser_EmailAlreadyExists() {
+        // Arrange
+        SignUpRequest request = SignUpRequest.builder()
+                .email("existing@example.com")
+                .password("password123")
+                .dateOfBirth(new Date())
+                .build();
+
+        when(authService.registerUser(any(SignUpRequest.class)))
+                .thenThrow(new UserAlreadyExistsException("User already exists"));
+
+        // Act & Assert
+        Exception exception = assertThrows(UserAlreadyExistsException.class, () -> authController.registerUser(request));
+        assertEquals("User already exists", exception.getMessage());
     }
 
   

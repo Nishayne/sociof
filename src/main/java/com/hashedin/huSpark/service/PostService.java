@@ -205,6 +205,17 @@ public class PostService {
             post.setFileType(postRequest.getFileType());
         }
 
+        // to avoid ModelMapper mapping errors as well as avoiding ConcurrentModification exceptions
+        // Force initialization before returning
+        try {
+            Hibernate.initialize(post.getComments());
+        } catch (Exception e) {
+        }
+        try {
+            Hibernate.initialize(post.getPostLikes());
+        } catch (Exception e) {
+        }
+
         Post updatedPost = postRepository.saveAndFlush(post); // Changed from save to saveAndFlush
         log.info("Post updated successfully: PostId: {}", updatedPost.getId());
         return updatedPost;
@@ -229,6 +240,30 @@ public class PostService {
             throw new UnauthorizedException("You do not have permission to delete this post");
         }
 
+        // Ensure collections are initialized before deletion
+        try {
+        Hibernate.initialize(post.getComments());
+        }
+        catch(Exception e) {}
+        try {
+        Hibernate.initialize(post.getPostLikes());
+        }catch(Exception e) {}
+        try {
+            Hibernate.initialize(post.getReports());
+            }catch(Exception e) {}
+
+        // Manually remove associated entities to avoid ConcurrentModificationException
+        postRepository.deleteCommentsByPostId(id);
+        postRepository.deleteLikesByPostId(id);
+        postRepository.deleteReportsByPostId(id);
+        
+        // Clear relationships to prevent errors
+        post.getComments().clear();  // Remove comments safely
+        post.getPostLikes().clear();  // Remove likes safely
+        post.getReports().clear(); // Remove reports safely
+        postRepository.saveAndFlush(post); // Ensure changes are persisted
+        
+        // Now delete safely
         postRepository.delete(post);
         log.info("Post deleted successfully: PostId: {}", id);
     }
