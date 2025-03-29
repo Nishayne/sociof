@@ -15,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
@@ -101,8 +103,8 @@ public class AuthServiceTest {
                 .dateOfBirth(new Date())
                 .build();
 
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.existsByEmail(eq("admin@socio.com"))).thenReturn(false);
+        when(passwordEncoder.encode(eq("password123"))).thenReturn("encodedPassword");
         when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> { // Changed from save to
                                                                                       // saveAndFlush
             User savedUser = invocation.getArgument(0);

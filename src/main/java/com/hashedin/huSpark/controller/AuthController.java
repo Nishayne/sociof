@@ -17,6 +17,7 @@ import com.hashedin.huSpark.dto.PasswordResetRequest;
 import com.hashedin.huSpark.dto.SignUpRequest;
 import com.hashedin.huSpark.dto.UserDto;
 import com.hashedin.huSpark.entity.User;
+import com.hashedin.huSpark.exception.UserAlreadyExistsException;
 import com.hashedin.huSpark.service.AuthService;
 
 import io.swagger.annotations.Api;
@@ -66,11 +67,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
 
         } catch (IllegalArgumentException e) {
-            // Handle cases where the email already exists or other validation issues
+            // Handle cases for validation issues
             log.warn("Signup failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        } catch (Exception e) {
+        } catch(UserAlreadyExistsException e) {
+            // Handle cases where the email already exists issue
+            log.warn("Signup failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); //409 error
+        }
+
+        catch (Exception e) {
             // Handle other unexpected exceptions
             log.error("Signup failed: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

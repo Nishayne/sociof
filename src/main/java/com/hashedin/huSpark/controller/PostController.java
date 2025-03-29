@@ -82,6 +82,9 @@ public class PostController {
     public ResponseEntity<PostDto> createPost(
             @Valid @RequestBody PostRequest postRequest,
             @CurrentUser UserPrincipal currentUser) {
+        log.info("PostController: Received request from user: {}", currentUser);
+        log.info("PostController: Received PostRequest: {}", postRequest);
+
         log.info("PostController: createPost: UserId: " + currentUser.getId());
 
         try {
